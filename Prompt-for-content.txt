@@ -1,0 +1,237 @@
+We have an existing pitch deck web app with        
+  animations already built. The design uses animated 
+   backgrounds with blurred glass panels in the      
+  foreground. Do not touch the design system,        
+  animations, or background. Your only job is to     
+  populate each slide with the right content and     
+  wire up the transition behavior correctly.         
+                                                     
+  TRANSITION BEHAVIOR — THIS APPLIES TO EVERY SLIDE: 
+  Every slide follows this exact sequence:           
+                                                     
+  Slide transition animation plays first             
+  Only once that animation is fully complete does    
+  content begin appearing                            
+  Content elements appear gradually, one after       
+  another, never all at once                         
+  When the user clicks to advance, content           
+  disappears first, then the slide transition        
+  animation plays                                    
+  Same sequence every time: content out, animation,  
+  new content in                                     
+                                                     
+  This applies to every single slide without         
+  exception.                                         
+                                                     
+  SLIDE 6 IS A SPECIAL CASE:                         
+  Slide 6 has two content states on the same slide.  
+  The background animation never stops or            
+  transitions. It keeps running. When the user       
+  advances from state 1 to state 2, only the content 
+   changes. The animation stays untouched. Content   
+  disappears gradually, then new content appears     
+  gradually. No slide transition animation between   
+  state 1 and state 2, just a content swap. When the 
+   user advances past state 2, the full slide        
+  transition plays as normal.                        
+                                                     
+  TOTAL SLIDES: 9 (slide 6 has 2 content states,     
+  counts as 1 slide)                                 
+                                                     
+  Slide 1: Cover                                     
+  Full screen. Centered.                             
+  Large: "Menius"                                    
+  Below: "Closing the gap between what AI can do and 
+   how it's used."                                   
+  Bottom of slide: Finn Jennen & Lucas Fedronic —    
+  menius.space                                       
+                                                     
+  Slide 2: The Founders                              
+  Two glass panels side by side. This slide exists   
+  to establish that angels are betting on people     
+  first. Finn owns distribution. Lucas owns          
+  technical. Both are AI power users. The split is   
+  intentional and should feel complementary, not     
+  competitive.                                       
+  Left panel — Finn Jennen, CEO:                     
+                                                     
+  18 years old                                       
+  From Ages 14-16 sold 20,000+ Belgian waffles doing $45K in 
+   sales.                               
+  Moved solo to Bali to build then made the jump to SF when the  
+  room wasn't right.                                 
+  In three weeks shipped product, found co-founder, got first       
+  customers.                             
+  AI power user, obsessed with education, user experience, data driven decisions, speed and revenue.      
+                                                     
+  Right panel — Lucas Fedronic, CTO:                 
+                                                     
+  Software engineer intern at Walmart Global Tech    
+  Top-9 finalist at Berkeley AI Hackathon, 350+      
+  teams                                              
+  Built agentic systems processing 1,600+ applicants 
+ at Transpose VC                                      
+  UC Davis, CS + Mathematics                         
+  AI power user, obsessed with agents, tracking data and speed.              
+                                                     
+  Single line centered at the bottom of the slide,   
+  smaller and softer than the rest: "Met in a pizza  
+  line at a hackathon. Lucas kept building after it  
+  was over."                                         
+                                                     
+  Slide 3: The Problem                               
+  This slide needs to land the tension immediately.  
+  The gap between what AI can do and how the average 
+   person uses it is vast and growing. Use contrast  
+  to make it visceral.                               
+  Headline: "The gap is massive. And it's getting    
+  bigger."                                           
+  Two contrasting panels appearing side by side:     
+  Left — "Average user":                             
+  Uses ChatGPT like Google. Types a question. Moves  
+  on.                                                
+  Right — "Power user":                              
+  Builds agentic employees that think and execute    
+  autonomously.                                      
+  Single line below both panels: "Most people don't  
+  know what they don't know. That's the problem. And 
+   the opportunity."                                 
+                                                     
+  Slide 4: The Insight                               
+  This slide establishes that Menius didn't guess.   
+  It talked to over a thousand people before writing 
+   a line of code. Three insights appear one at a    
+  time, each with a headline and one supporting      
+  line.                                              
+  Headline: "1,000+ people surveyed. 70 user         
+  interviews. Before we wrote a line of code."       
+  Three blocks, stacked, appearing one after         
+  another:                                           
+  The anxiety is real and growing.                   
+  People know they're falling behind on AI. They     
+  have no clear path forward.                        
+  Every existing solution starts too broad.          
+  Coursera, LinkedIn Learning, NotebookLM try to     
+  teach everything and hope to teach it well. We     
+  start with one skill, AI literacy, dial it in      
+  completely, then reverse engineer it to adjacent   
+  skills. Depth compounds. Breadth doesn't.          
+  Every existing solution is static.                 
+  By the time you finish a Coursera course it's      
+  already outdated. You can't learn AI by watching a 
+   video. You learn it by using it.                  
+                                                     
+  Slide 5: The Solution                              
+  This slide introduces Menius as an agent, not a    
+  course. The product visual carries the weight      
+  here. Text is minimal. The screenshot or mockup    
+  does the explaining.                               
+  Headline: "Menius is an agent that lives in your   
+  browser."                                          
+  Three lines appearing one at a time:               
+                                                     
+  Figures out your workflow and your role            
+  Finds the AI tools that actually matter for your   
+  job                                                
+  Teaches you those tools inside the tools           
+  themselves                                         
+                                                     
+  Below the text: product flow visual. Onboarding →  
+  personalized roadmap → Chrome extension guiding    
+  the user live inside an actual AI tool. Use a real 
+   screenshot or mockup if available in the          
+  codebase. This is the most visual slide in the     
+  deck. Let it breathe.                              
+                                                     
+  Slide 6: Strategy — The Funnel                     
+  One slide. Same background animation running       
+  continuously through both content states. No slide 
+   transition between state 1 and state 2. Only the  
+  content swaps.                                     
+  State 1 — The Funnel:                              
+  Headline: "One watertight funnel. Two streams of   
+  signal."                                           
+  Full slide is a clean funnel diagram, top to       
+  bottom, centered, lots of breathing room:          
+  Multiple channels → Website → Onboarding (every    
+  step tracked, A/B tested continuously) → Hard      
+  paywall                                            
+  Nothing else on this state. The funnel visual is   
+  the entire content. Let it breathe.                
+  State 2 — The Two Signals:                         
+  Same background, same slide. Content from state 1  
+  disappears gradually. New content appears          
+  gradually in two halves.                           
+  Left half — Pre-paywall, Distribution:             
+  Everything before the paywall feeds distribution.  
+  How we frame the problem, improve messaging, and   
+  optimize for conversion.                           
+  Right half — Post-paywall, Product:                
+  People who paid out of their own pocket. We        
+  interview every one. Their feedback drives every   
+  product decision. Nothing is built on assumption.  
+                                                     
+  Slide 7: Traction                                  
+  Numbers large and clean. Each appears one at a     
+  time with generous space between them. No          
+  decoration. Let the numbers speak.                 
+                                                     
+  550 waitlisted                                     
+  70 active users                                    
+  4 paying customers — no friends, no family — at    
+  $49                                                
+  $196 in revenue                                    
+  $100K investment offer received                    
+                                                     
+                                                     
+  Slide 8: Business Model                            
+  Three stages appearing one at a time sequentially: 
+  Now: $49 lifetime access while we build retention. 
+  Next: $20/month subscription — consumer and        
+  enterprise per-seat. Companies pay per employee.   
+  Long-term: We live inside users' browsers and      
+  workflows. The usage analytics we collect — which  
+  tools people use, how they use them, where they    
+  get stuck — is data AI companies will pay for. We  
+  sell it or build better products from it.          
+                                                     
+  Slide 9: Thank You                                 
+  Clean. Minimal. Centered. No noise.                
+  Finn Jennen — CEO                                  
+  finn.jennen@gmail.com                              
+  +1 408 663 9895                                    
+  Lucas Fedronic — CTO                               
+  lucasfedronic@gmail.com                            
+  +1 650 622 7668                                    
+  menius.space                                       
+  One closing line at the bottom: "The gap is        
+  closing."                                          
+                                                     
+  RULES — NON-NEGOTIABLE:                            
+  Do not touch the animation system, the background, 
+   or any existing design tokens. Only populate      
+  content into existing slide components. Every      
+  element on every slide appears gradually, never    
+  all at once. Content always waits for the slide    
+  transition animation to finish before it starts    
+  appearing. When the user advances, content         
+  disappears before the animation plays. Slide 6 is  
+  the exception: the animation never transitions,    
+  only the content swaps. Generous whitespace on     
+  every slide. The background is the visual. The     
+  content is the message. They never compete. so the 
+   code that is now running on port localhost 5173,  
+  the one with the beautiful automations of San      
+  Francisco, the city, the skyline, the sun, earth,  
+  the galaxy, the Milky Way, and all of that stuff,  
+  the content that it has right now, the text that   
+  is overlaid with it, we're going to change a       
+  little. We're not going to change any of the       
+  animations, any of the background, but the text I  
+  just pasted in is going to be used as a reference  
+  for what we're doing for the content that we're    
+  going to place on top of that. It's going to be on 
+   blurred glass backgrounds and it's going to have  
+  the content that I just pasted in so each slide is 
+   actually useful and is actually conveying value   
+  to our investors                     
