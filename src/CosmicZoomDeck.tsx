@@ -247,7 +247,7 @@ function IntroOverlay({ onComplete }: { onComplete: () => void }) {
 
   // Use refs for animation state to avoid re-renders just for logic
   const startTimeRef = useRef<number | null>(null);
-  const requestRef = useRef<number>();
+  const requestRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     const animate = (time: number) => {
