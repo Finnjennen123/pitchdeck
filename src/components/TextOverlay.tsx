@@ -210,7 +210,7 @@ const SLIDE_CONTENT: SlideContent[] = [
       { value: '550', label: 'waitlisted' },
       { value: '4', label: 'paying customers' },
       { value: '$196', label: 'revenue' },
-      { value: '$100K', label: 'investment offer rejected' }
+      { value: '$100K', label: 'VC offer' }
     ]
   },
   // Slide 8: Business Model
