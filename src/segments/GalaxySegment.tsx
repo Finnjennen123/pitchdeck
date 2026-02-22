@@ -9,7 +9,7 @@ const SPIN = 1.8;
 const RANDOMNESS = 0.5;
 const MAX_RADIUS = 50;
 
-function SpiralGalaxy() {
+function SpiralGalaxy({ visible }: { visible: boolean }) {
   const pointsRef = useRef<THREE.Points>(null);
 
   const { positions, colors } = useMemo(() => {
@@ -52,6 +52,7 @@ function SpiralGalaxy() {
   }, []);
 
   useFrame((_, delta) => {
+    if (!visible) return;
     if (pointsRef.current) {
       pointsRef.current.rotation.y += delta * 0.015;
     }
@@ -76,7 +77,7 @@ function SpiralGalaxy() {
   );
 }
 
-function GalacticCore() {
+function GalacticCore({ visible }: { visible: boolean }) {
   const coreRef = useRef<THREE.Points>(null);
 
   const { positions, colors } = useMemo(() => {
@@ -104,6 +105,7 @@ function GalacticCore() {
   }, []);
 
   useFrame((_, delta) => {
+    if (!visible) return;
     if (coreRef.current) {
       coreRef.current.rotation.y += delta * 0.02;
     }
@@ -140,8 +142,8 @@ interface GalaxySegmentProps {
 export function GalaxySegment({ visible }: GalaxySegmentProps) {
   return (
     <group visible={visible}>
-      <SpiralGalaxy />
-      <GalacticCore />
+      <SpiralGalaxy visible={visible} />
+      <GalacticCore visible={visible} />
       <BackgroundStars />
     </group>
   );

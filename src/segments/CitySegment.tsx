@@ -281,9 +281,10 @@ function StreetGrid() {
 }
 
 // Thin cloud wisps — subtle atmospheric depth without obscuring aerial view
-function HighClouds() {
+function HighClouds({ visible }: { visible: boolean }) {
   const matRef = useRef<THREE.ShaderMaterial>(null);
   useFrame((_, delta) => {
+    if (!visible) return;
     if (matRef.current) matRef.current.uniforms.uTime.value += delta * 0.12;
   });
 
@@ -611,7 +612,7 @@ export function CitySegment({ visible }: CitySegmentProps) {
       <GoldenGateBridge />
 
       {/* Thin cloud wisps */}
-      <HighClouds />
+      <HighClouds visible={visible} />
     </group>
   );
 }

@@ -22,7 +22,7 @@ const SUN_TOTAL = SUN_CORE_COUNT + SUN_CORONA_COUNT;
 const SUN_CORE_RADIUS = 2.5;
 const SUN_CORONA_OUTER = 5.0;
 
-function ParticleSun() {
+function ParticleSun({ visible }: { visible: boolean }) {
   const pointsRef = useRef<THREE.Points>(null);
 
   const { positions, colors } = useMemo(() => {
@@ -89,6 +89,7 @@ function ParticleSun() {
   const tex = useMemo(() => getStarTexture(), []);
 
   useFrame((_, delta) => {
+    if (!visible) return;
     if (pointsRef.current) {
       pointsRef.current.rotation.y += delta * 0.025;
       pointsRef.current.rotation.x += delta * 0.008;
@@ -158,13 +159,14 @@ function ParticleSun() {
 }
 
 // Earth in the solar system uses the real texture
-function SolarEarth({ distance, speed }: { distance: number; speed: number }) {
+function SolarEarth({ distance, speed, visible }: { distance: number; speed: number; visible: boolean }) {
   const groupRef = useRef<THREE.Group>(null);
   const initialAngle = useMemo(() => 2.1, []);
 
-  const [dayMap] = useLoader(TextureLoader, ['/textures/earth_day_4k.jpg']);
+  const [dayMap] = useLoader(TextureLoader, ['textures/earth_day_4k.jpg']);
 
   useFrame((state) => {
+    if (!visible) return;
     if (groupRef.current) {
       const angle = initialAngle + state.clock.elapsedTime * speed * 0.1;
       groupRef.current.position.x = Math.cos(angle) * distance;
@@ -187,14 +189,15 @@ function SolarEarth({ distance, speed }: { distance: number; speed: number }) {
   );
 }
 
-function Planet({ distance, size, color, speed, rings, emissive }: {
+function Planet({ distance, size, color, speed, rings, emissive, visible }: {
   distance: number; size: number; color: string; speed: number;
-  rings?: boolean; emissive?: string;
+  rings?: boolean; emissive?: string; visible?: boolean;
 }) {
   const groupRef = useRef<THREE.Group>(null);
   const initialAngle = useMemo(() => Math.random() * Math.PI * 2, []);
 
   useFrame((state) => {
+    if (!visible) return;
     if (groupRef.current) {
       const angle = initialAngle + state.clock.elapsedTime * speed * 0.1;
       groupRef.current.position.x = Math.cos(angle) * distance;
@@ -286,14 +289,14 @@ export function SolarSegment({ visible }: SolarSegmentProps) {
   return (
     <group visible={visible}>
       <ambientLight intensity={0.04} />
-      <ParticleSun />
+      <ParticleSun visible={visible} />
 
       <Suspense fallback={null}>
-        <SolarEarth distance={10} speed={1.0} />
+        <SolarEarth distance={10} speed={1.0} visible={visible} />
       </Suspense>
 
       {PLANETS.filter(p => p.name !== 'Earth').map((planet) => (
-        <Planet key={planet.name} {...planet} />
+        <Planet key={planet.name} {...planet} visible={visible} />
       ))}
 
       <OrbitRings />

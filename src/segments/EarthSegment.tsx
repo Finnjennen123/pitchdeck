@@ -7,17 +7,18 @@ import { atmosphereVertexShader, atmosphereFragmentShader } from '../shaders/atm
 
 const EARTH_RADIUS = 10;
 
-function EarthGlobe() {
+function EarthGlobe({ visible }: { visible: boolean }) {
   const cloudsRef = useRef<THREE.Mesh>(null);
   const earthRef = useRef<THREE.Mesh>(null);
 
   const [dayMap, nightMap, cloudsMap] = useLoader(TextureLoader, [
-    '/textures/earth_day_4k.jpg',
-    '/textures/earth_night_4k.jpg',
-    '/textures/earth_clouds_2k.jpg',
+    'textures/earth_day_4k.jpg',
+    'textures/earth_night_4k.jpg',
+    'textures/earth_clouds_2k.jpg',
   ]);
 
   useFrame((_, delta) => {
+    if (!visible) return;
     // Only clouds rotate — Earth stays fixed so camera always finds California
     if (cloudsRef.current) cloudsRef.current.rotation.y += delta * 0.006;
   });
@@ -67,7 +68,7 @@ export function EarthSegment({ visible }: EarthSegmentProps) {
       <ambientLight intensity={0.1} />
 
       <Suspense fallback={null}>
-        <EarthGlobe />
+        <EarthGlobe visible={visible} />
       </Suspense>
 
       <SoftStars count={6000} radius={400} minSize={0.4} maxSize={1.5} opacity={0.85} warmth={0.3} />

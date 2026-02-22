@@ -10,7 +10,7 @@ interface SlideContent {
   position: 'center' | 'center-left' | 'center-right' | 'bottom-left' | 'bottom-right';
   dim?: boolean;
   type?: 'default' | 'columns' | 'blocks' | 'list' | 'funnel' | 'stats' | 'contact' | 'video';
-  
+
   funnelSteps?: string[];
   videoEmbed?: string;
 
@@ -21,24 +21,24 @@ interface SlideContent {
     image?: string;
     bullets?: string[];
   }[];
-  
+
   blocks?: {
     title?: string;
     body?: string;
   }[];
-  
+
   listItems?: string[];
   listTitle?: string;
-  
+
   stats?: { value: string; label: string }[];
-  
+
   contactInfo?: {
     name: string;
     role: string;
     email: string;
     phone: string;
   }[];
-  
+
   cta?: {
     text: string;
     url: string;
@@ -66,7 +66,7 @@ const SLIDE_CONTENT: SlideContent[] = [
     columns: [
       {
         title: 'Finn Jennen, CEO',
-        image: '/images/finn.jpg',
+        image: 'images/finn.jpg',
         bullets: [
           '18 years old',
           'From ages 14-16 sold 20,000+ Belgian waffles doing $45K in sales.',
@@ -77,7 +77,7 @@ const SLIDE_CONTENT: SlideContent[] = [
       },
       {
         title: 'Lucas Fedronic, CTO',
-        image: '/images/lucas.jpg',
+        image: 'images/lucas.jpg',
         bullets: [
           '20 years old',
           'Software engineer intern at Walmart Global Tech',
@@ -259,7 +259,7 @@ export type TransitionState = 'idle' | 'exiting' | 'moving';
 export function TextOverlay({ currentSlide, transitionState, transitionData }: { currentSlide: number; transitionState: TransitionState; transitionData?: { from: number; to: number } | null }) {
   const visible = transitionState === 'idle';
   const content = SLIDE_CONTENT[currentSlide];
-  
+
   if (!content) return null;
 
   // Determine if header should stay visible
@@ -307,7 +307,7 @@ export function TextOverlay({ currentSlide, transitionState, transitionData }: {
   const isBottom = content.position.includes('bottom');
   const isTitleSlide = currentSlide === 0;
   const isBrightSlide = [6, 7, 8].includes(currentSlide);
-  
+
   // Base delay for stagger
   let delayCounter = 0;
   const getDelay = () => {
@@ -372,359 +372,359 @@ export function TextOverlay({ currentSlide, transitionState, transitionData }: {
       }}>
         {/* Title */}
         {content.title && (
-        <FadeIn show={showTitle} delay={getDelay()}>
-          <h1 style={{
-            fontFamily: isTitleSlide ? "'Playfair Display', serif" : "'Plus Jakarta Sans', sans-serif",
-            fontSize: isTitleSlide ? 160 : 52,
-            fontWeight: isTitleSlide ? 600 : 700,
-            fontStyle: isTitleSlide ? 'italic' : 'normal',
-            color: '#fff',
-            textShadow: '0 0 60px rgba(0,0,0,0.9), 0 0 120px rgba(0,0,0,0.6), 0 4px 20px rgba(0,0,0,0.8)',
-            marginBottom: isTitleSlide ? 24 : 32,
-            letterSpacing: isTitleSlide ? '-0.02em' : '-0.03em',
-            lineHeight: 1.1,
-            maxWidth: isTitleSlide ? 1000 : 900,
-            whiteSpace: 'pre-line', // Allow newlines in title
-          }}>
-            {content.title}
-          </h1>
-        </FadeIn>
-      )}
-
-      {/* Subtitle */}
-      {content.subtitle && (
-        <FadeIn show={showSubtitle} delay={getDelay()} style={content.subtitleBox ? {
-          background: 'rgba(255,255,255,0.03)',
-          backdropFilter: 'blur(20px)',
-          padding: '32px 40px',
-          borderRadius: 24,
-          border: '1px solid rgba(255,255,255,0.08)',
-          maxWidth: 1000,
-          width: '100%',
-          marginBottom: 32,
-        } : undefined}>
-          <p style={{
-            fontFamily: "'Plus Jakarta Sans', sans-serif",
-            fontSize: isTitleSlide ? 32 : 24,
-            fontWeight: isTitleSlide ? 500 : 400,
-            color: isTitleSlide ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.85)',
-            textShadow: '0 0 40px rgba(0,0,0,0.8), 0 2px 10px rgba(0,0,0,0.6)',
-            lineHeight: isTitleSlide ? 1.4 : 1.6,
-            letterSpacing: isTitleSlide ? '-0.01em' : '-0.01em',
-            whiteSpace: 'pre-line',
-            maxWidth: content.subtitleBox ? '100%' : (isTitleSlide ? 800 : 700),
-            marginBottom: content.subtitleBox ? 0 : (isTitleSlide ? 0 : 32),
-            margin: 0,
-          }}>
-            {content.subtitle}
-          </p>
-        </FadeIn>
-      )}
-
-      {/* Columns */}
-      {content.type === 'columns' && content.columns && (
-        <div style={{ 
-          display: 'flex', 
-          flexWrap: 'wrap', 
-          gap: 'clamp(24px, 4vw, 60px)', 
-          marginTop: 20, 
-          maxWidth: 1200, 
-          width: '100%',
-          justifyContent: 'center'
-        }}>
-          {content.columns.map((col, i) => (
-            <FadeIn key={i} show={visible} delay={getDelay()} style={{ 
-              flex: '1 1 300px', 
-              background: isBrightSlide ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.03)', 
-              backdropFilter: 'blur(20px)', 
-              padding: 'clamp(24px, 3vw, 40px)', 
-              borderRadius: 24, 
-              border: '1px solid rgba(255,255,255,0.08)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 24,
-              textAlign: 'left' // Force left alignment
+          <FadeIn show={showTitle} delay={getDelay()}>
+            <h1 style={{
+              fontFamily: isTitleSlide ? "'Playfair Display', serif" : "'Plus Jakarta Sans', sans-serif",
+              fontSize: isTitleSlide ? 160 : 52,
+              fontWeight: isTitleSlide ? 600 : 700,
+              fontStyle: isTitleSlide ? 'italic' : 'normal',
+              color: '#fff',
+              textShadow: '0 0 60px rgba(0,0,0,0.9), 0 0 120px rgba(0,0,0,0.6), 0 4px 20px rgba(0,0,0,0.8)',
+              marginBottom: isTitleSlide ? 24 : 32,
+              letterSpacing: isTitleSlide ? '-0.02em' : '-0.03em',
+              lineHeight: 1.1,
+              maxWidth: isTitleSlide ? 1000 : 900,
+              whiteSpace: 'pre-line', // Allow newlines in title
             }}>
-               {/* Image & Title Header */}
-               <div style={{ 
-                 display: 'flex', 
-                 alignItems: 'center', 
-                 gap: 24, 
-                 paddingBottom: 24, 
-                 borderBottom: '1px solid rgba(255,255,255,0.1)' 
-               }}>
-                 {col.image && (
-                   <img 
-                     src={col.image} 
-                     alt={col.title} 
-                     style={{ 
-                       width: 80, 
-                       height: 80, 
-                       borderRadius: '50%', 
-                       objectFit: 'cover', 
-                       border: '2px solid rgba(255,255,255,0.2)',
-                       boxShadow: '0 4px 20px rgba(0,0,0,0.4)'
-                     }} 
-                   />
-                 )}
-                 {col.title && (
-                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                     <h3 style={{ 
-                       fontSize: 28, 
-                       fontWeight: 600, 
-                       fontFamily: "'Playfair Display', serif", 
-                       margin: 0,
-                       letterSpacing: '-0.01em'
-                     }}>
-                       {col.title.split(',')[0]}
-                     </h3>
-                     <span style={{ 
-                       fontSize: 16, 
-                       fontWeight: 500, 
-                       color: 'rgba(255,255,255,0.5)', 
-                       textTransform: 'uppercase', 
-                       letterSpacing: '0.05em',
-                       fontFamily: "'Plus Jakarta Sans', sans-serif"
-                     }}>
-                       {col.subtitle || col.title.split(',')[1]}
-                     </span>
-                   </div>
-                 )}
-               </div>
+              {content.title}
+            </h1>
+          </FadeIn>
+        )}
 
-               {/* Bullet Points */}
-              {col.bullets && (
-                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 16, flex: 1 }}>
-                  {col.bullets.map((bullet, bIndex) => (
-                    <li key={bIndex} style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
-                      <span style={{ 
-                        color: 'rgba(255,255,255,0.3)', 
-                        fontSize: 14, 
-                        marginTop: 5,
-                        flexShrink: 0
-                      }}>●</span>
-                      <span style={{ 
-                        fontSize: 16, 
-                        lineHeight: 1.5, 
-                        color: 'rgba(255,255,255,0.85)',
-                        fontFamily: "'Plus Jakarta Sans', sans-serif",
-                        fontWeight: 400
-                      }}>
-                        {bullet}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
+        {/* Subtitle */}
+        {content.subtitle && (
+          <FadeIn show={showSubtitle} delay={content.subtitleBox ? 0 : getDelay()} style={content.subtitleBox ? {
+            background: 'rgba(255,255,255,0.03)',
+            backdropFilter: 'blur(20px)',
+            padding: '32px 40px',
+            borderRadius: 24,
+            border: '1px solid rgba(255,255,255,0.08)',
+            maxWidth: 1000,
+            width: '100%',
+            marginBottom: 32,
+          } : undefined}>
+            <p style={{
+              fontFamily: "'Plus Jakarta Sans', sans-serif",
+              fontSize: isTitleSlide ? 32 : 24,
+              fontWeight: isTitleSlide ? 500 : 400,
+              color: isTitleSlide ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.85)',
+              textShadow: '0 0 40px rgba(0,0,0,0.8), 0 2px 10px rgba(0,0,0,0.6)',
+              lineHeight: isTitleSlide ? 1.4 : 1.6,
+              letterSpacing: isTitleSlide ? '-0.01em' : '-0.01em',
+              whiteSpace: 'pre-line',
+              maxWidth: content.subtitleBox ? '100%' : (isTitleSlide ? 800 : 700),
+              marginBottom: content.subtitleBox ? 0 : (isTitleSlide ? 0 : 32),
+              margin: 0,
+            }}>
+              {content.subtitle}
+            </p>
+          </FadeIn>
+        )}
 
-              {/* Body Text */}
-              {col.body && <p style={{ fontSize: 18, lineHeight: 1.6, whiteSpace: 'pre-line', color: 'rgba(255,255,255,0.9)', marginTop: 24, fontStyle: 'italic' }}>{col.body}</p>}
-            </FadeIn>
-          ))}
-        </div>
-      )}
-
-      {/* Blocks */}
-      {content.type === 'blocks' && content.blocks && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 24, marginTop: 20, maxWidth: 800 }}>
-          {content.blocks.map((block, i) => (
-            <FadeIn key={i} show={visible} delay={getDelay()} style={{ background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(10px)', padding: 24, borderRadius: 12, borderLeft: '4px solid rgba(255,255,255,0.3)' }}>
-              {block.title && <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 8 }}>{block.title}</h3>}
-              {block.body && <p style={{ fontSize: 16, lineHeight: 1.5, color: 'rgba(255,255,255,0.85)' }}>{block.body}</p>}
-            </FadeIn>
-          ))}
-        </div>
-      )}
-
-      {/* List */}
-      {content.type === 'list' && content.listItems && (
-        <FadeIn show={visible} delay={getDelay()} style={{ 
-          marginTop: 20, 
-          maxWidth: 900,
-          background: isBrightSlide ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.03)',
-          backdropFilter: 'blur(24px)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: 32,
-          padding: '48px',
-          boxShadow: '0 4px 24px -1px rgba(0, 0, 0, 0.2)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 24,
-        }}>
-          {content.listItems.map((item, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#fff', marginTop: 10, flexShrink: 0 }} />
-              <p style={{ fontSize: 24, lineHeight: 1.5, color: 'rgba(255,255,255,0.95)', margin: 0, fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 400, fontStyle: 'italic' }}>{item}</p>
-            </div>
-          ))}
-        </FadeIn>
-      )}
-      
-      {/* Funnel Visual */}
-      {content.type === 'funnel' && content.funnelSteps && (
-        <FadeIn show={visible} delay={getDelay()} style={{ 
-          marginTop: 40, 
-          display: 'flex', 
-          flexDirection: 'column', 
-          alignItems: 'center', 
-          gap: 0, // No gap, stacked
-          width: '100%',
-          maxWidth: 800
-        }}>
-          {content.funnelSteps.map((step, i) => {
-            const widthPercentage = 100 - (i * 20); // 100%, 80%, 60%, 40%
-            // Calculate clip path for trapezoid effect
-            // We want top width to be wider than bottom width
-            // But to make them stack nicely, we'll just use rounded rectangles that decrease in width
-            // as "boring blocks" was the complaint, maybe we can add a subtle gradient or border
-            
-            return (
-              <div key={i} style={{
-                width: `${widthPercentage}%`,
-                minWidth: 320,
-                background: 'rgba(255,255,255,0.05)', // Lighter background
-                backdropFilter: 'blur(10px)',
-                padding: '20px',
-                marginBottom: 8,
-                borderRadius: 12,
-                border: '1px solid rgba(255,255,255,0.15)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                textAlign: 'center',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-                position: 'relative',
-                zIndex: content.funnelSteps!.length - i,
-                // Add a subtle gradient to make it less "boring"
-                backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%)',
-              }}>
-                <span style={{
-                  fontSize: 22,
-                  fontWeight: 500,
-                  color: '#fff',
-                  fontFamily: "'Plus Jakarta Sans', sans-serif",
-                  letterSpacing: '-0.01em',
-                  textShadow: '0 2px 4px rgba(0,0,0,0.3)'
-                }}>
-                  {step}
-                </span>
-              </div>
-            );
-          })}
-        </FadeIn>
-      )}
-
-
-      {/* Default Body */}
-      {content.body && content.type !== 'columns' && content.type !== 'blocks' && (
-        <FadeIn show={visible} delay={getDelay()}>
-          <p style={{
-            fontFamily: "'Inter', sans-serif",
-            fontSize: 20,
-            fontWeight: 400,
-            color: content.dim ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.88)',
-            textShadow: '0 0 40px rgba(0,0,0,0.8), 0 2px 10px rgba(0,0,0,0.6)',
-            lineHeight: 1.7,
-            whiteSpace: 'pre-line',
-            maxWidth: 650,
+        {/* Columns */}
+        {content.type === 'columns' && content.columns && (
+          <div style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 'clamp(24px, 4vw, 60px)',
             marginTop: 20,
+            maxWidth: 1200,
+            width: '100%',
+            justifyContent: 'center'
           }}>
-            {content.body}
-          </p>
-        </FadeIn>
-      )}
-
-      {/* Stats */}
-      {content.stats && (
-        <FadeIn show={visible} delay={getDelay()} style={{
-          display: 'flex',
-          gap: 64,
-          marginTop: 24,
-          flexWrap: 'wrap',
-          justifyContent: 'center',
-          maxWidth: 1000,
-          background: isBrightSlide ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.03)',
-          backdropFilter: 'blur(24px)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: 32,
-          padding: '48px',
-          boxShadow: '0 4px 24px -1px rgba(0, 0, 0, 0.2)',
-        }}>
-          {content.stats.map((stat, i) => (
-            <div key={i} style={{ textAlign: 'center' }}>
-              <div style={{
-                fontFamily: "'Inter', sans-serif",
-                fontSize: 52,
-                fontWeight: 800,
-                color: '#fff',
-                textShadow: '0 0 40px rgba(100,180,255,0.4), 0 0 80px rgba(100,180,255,0.2)',
-                lineHeight: 1.2,
+            {content.columns.map((col, i) => (
+              <FadeIn key={i} show={visible} delay={getDelay()} style={{
+                flex: '1 1 300px',
+                background: isBrightSlide ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.03)',
+                backdropFilter: 'blur(20px)',
+                padding: 'clamp(24px, 3vw, 40px)',
+                borderRadius: 24,
+                border: '1px solid rgba(255,255,255,0.08)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 24,
+                textAlign: 'left' // Force left alignment
               }}>
-                {stat.value}
-              </div>
-              <div style={{
-                fontFamily: "'Inter', sans-serif",
-                fontSize: 14,
-                fontWeight: 500,
-                color: 'rgba(255,255,255,0.55)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.12em',
-                marginTop: 4,
-                maxWidth: 150,
-                margin: '4px auto 0'
-              }}>
-                {stat.label}
-              </div>
-            </div>
-          ))}
-        </FadeIn>
-      )}
-      
-      {/* Contact Info */}
-      {content.contactInfo && (
-        <div style={{ display: 'flex', gap: 80, marginTop: 40, justifyContent: 'center' }}>
-          {content.contactInfo.map((contact, i) => (
-            <FadeIn key={i} show={visible} delay={getDelay()} style={{ textAlign: 'center' }}>
-              <h3 style={{ fontSize: 28, fontWeight: 700 }}>{contact.name}</h3>
-              <p style={{ fontSize: 18, color: 'rgba(255,255,255,0.6)', marginBottom: 16 }}>{contact.role}</p>
-              <p style={{ fontSize: 16 }}>{contact.email}</p>
-              <p style={{ fontSize: 16 }}>{contact.phone}</p>
-            </FadeIn>
-          ))}
-        </div>
-      )}
+                {/* Image & Title Header */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 24,
+                  paddingBottom: 24,
+                  borderBottom: '1px solid rgba(255,255,255,0.1)'
+                }}>
+                  {col.image && (
+                    <img
+                      src={col.image}
+                      alt={col.title}
+                      style={{
+                        width: 80,
+                        height: 80,
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                        border: '2px solid rgba(255,255,255,0.2)',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.4)'
+                      }}
+                    />
+                  )}
+                  {col.title && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      <h3 style={{
+                        fontSize: 28,
+                        fontWeight: 600,
+                        fontFamily: "'Playfair Display', serif",
+                        margin: 0,
+                        letterSpacing: '-0.01em'
+                      }}>
+                        {col.title.split(',')[0]}
+                      </h3>
+                      <span style={{
+                        fontSize: 16,
+                        fontWeight: 500,
+                        color: 'rgba(255,255,255,0.5)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                        fontFamily: "'Plus Jakarta Sans', sans-serif"
+                      }}>
+                        {col.subtitle || col.title.split(',')[1]}
+                      </span>
+                    </div>
+                  )}
+                </div>
 
-      {/* Video Embed */}
-      {content.type === 'video' && content.videoEmbed && (
-        <FadeIn show={visible} delay={getDelay()} style={{
-          marginTop: 20,
-          width: '100%',
-          maxWidth: 900,
-          aspectRatio: '16/9',
-          background: 'rgba(0,0,0,0.3)',
-          borderRadius: 24,
-          overflow: 'hidden',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
-          border: '1px solid rgba(255,255,255,0.1)',
-        }}>
-          <iframe
-            width="100%"
-            height="100%"
-            src={content.videoEmbed}
-            title="YouTube video player"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen
-            style={{ display: 'block' }}
-          />
-        </FadeIn>
-      )}
+                {/* Bullet Points */}
+                {col.bullets && (
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 16, flex: 1 }}>
+                    {col.bullets.map((bullet, bIndex) => (
+                      <li key={bIndex} style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+                        <span style={{
+                          color: 'rgba(255,255,255,0.3)',
+                          fontSize: 14,
+                          marginTop: 5,
+                          flexShrink: 0
+                        }}>●</span>
+                        <span style={{
+                          fontSize: 16,
+                          lineHeight: 1.5,
+                          color: 'rgba(255,255,255,0.85)',
+                          fontFamily: "'Plus Jakarta Sans', sans-serif",
+                          fontWeight: 400
+                        }}>
+                          {bullet}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {/* Body Text */}
+                {col.body && <p style={{ fontSize: 18, lineHeight: 1.6, whiteSpace: 'pre-line', color: 'rgba(255,255,255,0.9)', marginTop: 24, fontStyle: 'italic' }}>{col.body}</p>}
+              </FadeIn>
+            ))}
+          </div>
+        )}
+
+        {/* Blocks */}
+        {content.type === 'blocks' && content.blocks && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24, marginTop: 20, maxWidth: 800 }}>
+            {content.blocks.map((block, i) => (
+              <FadeIn key={i} show={visible} delay={getDelay()} style={{ background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(10px)', padding: 24, borderRadius: 12, borderLeft: '4px solid rgba(255,255,255,0.3)' }}>
+                {block.title && <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 8 }}>{block.title}</h3>}
+                {block.body && <p style={{ fontSize: 16, lineHeight: 1.5, color: 'rgba(255,255,255,0.85)' }}>{block.body}</p>}
+              </FadeIn>
+            ))}
+          </div>
+        )}
+
+        {/* List */}
+        {content.type === 'list' && content.listItems && (
+          <FadeIn show={visible} delay={getDelay()} style={{
+            marginTop: 20,
+            maxWidth: 900,
+            background: isBrightSlide ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.03)',
+            backdropFilter: 'blur(24px)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: 32,
+            padding: '48px',
+            boxShadow: '0 4px 24px -1px rgba(0, 0, 0, 0.2)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 24,
+          }}>
+            {content.listItems.map((item, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#fff', marginTop: 10, flexShrink: 0 }} />
+                <p style={{ fontSize: 24, lineHeight: 1.5, color: 'rgba(255,255,255,0.95)', margin: 0, fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 400, fontStyle: 'italic' }}>{item}</p>
+              </div>
+            ))}
+          </FadeIn>
+        )}
+
+        {/* Funnel Visual */}
+        {content.type === 'funnel' && content.funnelSteps && (
+          <FadeIn show={visible} delay={getDelay()} style={{
+            marginTop: 40,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 0, // No gap, stacked
+            width: '100%',
+            maxWidth: 800
+          }}>
+            {content.funnelSteps.map((step, i) => {
+              const widthPercentage = 100 - (i * 20); // 100%, 80%, 60%, 40%
+              // Calculate clip path for trapezoid effect
+              // We want top width to be wider than bottom width
+              // But to make them stack nicely, we'll just use rounded rectangles that decrease in width
+              // as "boring blocks" was the complaint, maybe we can add a subtle gradient or border
+
+              return (
+                <div key={i} style={{
+                  width: `${widthPercentage}%`,
+                  minWidth: 320,
+                  background: 'rgba(255,255,255,0.05)', // Lighter background
+                  backdropFilter: 'blur(10px)',
+                  padding: '20px',
+                  marginBottom: 8,
+                  borderRadius: 12,
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  textAlign: 'center',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                  position: 'relative',
+                  zIndex: content.funnelSteps!.length - i,
+                  // Add a subtle gradient to make it less "boring"
+                  backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%)',
+                }}>
+                  <span style={{
+                    fontSize: 22,
+                    fontWeight: 500,
+                    color: '#fff',
+                    fontFamily: "'Plus Jakarta Sans', sans-serif",
+                    letterSpacing: '-0.01em',
+                    textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                  }}>
+                    {step}
+                  </span>
+                </div>
+              );
+            })}
+          </FadeIn>
+        )}
+
+
+        {/* Default Body */}
+        {content.body && content.type !== 'columns' && content.type !== 'blocks' && (
+          <FadeIn show={visible} delay={getDelay()}>
+            <p style={{
+              fontFamily: "'Inter', sans-serif",
+              fontSize: 20,
+              fontWeight: 400,
+              color: content.dim ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.88)',
+              textShadow: '0 0 40px rgba(0,0,0,0.8), 0 2px 10px rgba(0,0,0,0.6)',
+              lineHeight: 1.7,
+              whiteSpace: 'pre-line',
+              maxWidth: 650,
+              marginTop: 20,
+            }}>
+              {content.body}
+            </p>
+          </FadeIn>
+        )}
+
+        {/* Stats */}
+        {content.stats && (
+          <FadeIn show={visible} delay={getDelay()} style={{
+            display: 'flex',
+            gap: 64,
+            marginTop: 24,
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            maxWidth: 1000,
+            background: isBrightSlide ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.03)',
+            backdropFilter: 'blur(24px)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: 32,
+            padding: '48px',
+            boxShadow: '0 4px 24px -1px rgba(0, 0, 0, 0.2)',
+          }}>
+            {content.stats.map((stat, i) => (
+              <div key={i} style={{ textAlign: 'center' }}>
+                <div style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: 52,
+                  fontWeight: 800,
+                  color: '#fff',
+                  textShadow: '0 0 40px rgba(100,180,255,0.4), 0 0 80px rgba(100,180,255,0.2)',
+                  lineHeight: 1.2,
+                }}>
+                  {stat.value}
+                </div>
+                <div style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: 14,
+                  fontWeight: 500,
+                  color: 'rgba(255,255,255,0.55)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.12em',
+                  marginTop: 4,
+                  maxWidth: 150,
+                  margin: '4px auto 0'
+                }}>
+                  {stat.label}
+                </div>
+              </div>
+            ))}
+          </FadeIn>
+        )}
+
+        {/* Contact Info */}
+        {content.contactInfo && (
+          <div style={{ display: 'flex', gap: 80, marginTop: 40, justifyContent: 'center' }}>
+            {content.contactInfo.map((contact, i) => (
+              <FadeIn key={i} show={visible} delay={getDelay()} style={{ textAlign: 'center' }}>
+                <h3 style={{ fontSize: 28, fontWeight: 700 }}>{contact.name}</h3>
+                <p style={{ fontSize: 18, color: 'rgba(255,255,255,0.6)', marginBottom: 16 }}>{contact.role}</p>
+                <p style={{ fontSize: 16 }}>{contact.email}</p>
+                <p style={{ fontSize: 16 }}>{contact.phone}</p>
+              </FadeIn>
+            ))}
+          </div>
+        )}
+
+        {/* Video Embed */}
+        {content.type === 'video' && content.videoEmbed && (
+          <FadeIn show={visible} delay={getDelay()} style={{
+            marginTop: 20,
+            width: '100%',
+            maxWidth: 900,
+            aspectRatio: '16/9',
+            background: 'rgba(0,0,0,0.3)',
+            borderRadius: 24,
+            overflow: 'hidden',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+            border: '1px solid rgba(255,255,255,0.1)',
+          }}>
+            <iframe
+              width="100%"
+              height="100%"
+              src={content.videoEmbed}
+              title="YouTube video player"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              style={{ display: 'block' }}
+            />
+          </FadeIn>
+        )}
 
         {/* Email CTA */}
         {content.emailCta && (
           <FadeIn show={visible} delay={getDelay()}>
             <div style={{ marginTop: 80, pointerEvents: 'auto' }}>
-              <a 
+              <a
                 href={`mailto:${content.emailCta.email}`}
                 style={{
                   display: 'inline-block',
@@ -751,9 +751,9 @@ export function TextOverlay({ currentSlide, transitionState, transitionData }: {
         {content.cta && (
           <FadeIn show={visible} delay={getDelay()}>
             <div style={{ marginTop: content.emailCta ? 20 : 80, pointerEvents: 'auto' }}>
-              <a 
-                href={content.cta.url} 
-                target="_blank" 
+              <a
+                href={content.cta.url}
+                target="_blank"
                 rel="noopener noreferrer"
                 style={{
                   display: 'inline-block',
@@ -781,7 +781,7 @@ export function TextOverlay({ currentSlide, transitionState, transitionData }: {
       {content.footer && (
         <FadeIn show={showFooter} delay={getDelay()} style={{
           position: isTitleSlide ? 'absolute' : 'relative',
-          bottom: isTitleSlide ? 60 : 'auto',
+          bottom: isTitleSlide ? 100 : 'auto',
           marginTop: isTitleSlide ? 0 : 60,
           opacity: 0.9,
           width: '100%',
@@ -809,6 +809,62 @@ export function TextOverlay({ currentSlide, transitionState, transitionData }: {
           </p>
         </FadeIn>
       )}
+      {/* Navigation Hint - Only on Title Slide */}
+      {isTitleSlide && (
+        <FadeIn show={visible} delay={500} style={{
+          position: 'absolute',
+          bottom: 30,
+          left: 0,
+          right: 0,
+          display: 'flex',
+          justifyContent: 'center',
+          pointerEvents: 'none',
+          zIndex: 100,
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            background: 'rgba(0,0,0,0.6)',
+            padding: '12px 24px',
+            borderRadius: 99,
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
+          }}>
+            <span style={{
+              fontSize: 16,
+              fontFamily: "'Plus Jakarta Sans', sans-serif",
+              color: 'rgba(255,255,255,0.95)',
+              fontWeight: 500,
+              letterSpacing: '0.02em'
+            }}>
+              Use arrows to go back and forth
+            </span>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <kbd style={{
+                background: 'rgba(255,255,255,0.15)',
+                padding: '2px 8px',
+                borderRadius: 6,
+                fontSize: 14,
+                fontFamily: 'monospace',
+                color: 'rgba(255,255,255,0.9)',
+                border: '1px solid rgba(255,255,255,0.1)'
+              }}>←</kbd>
+              <kbd style={{
+                background: 'rgba(255,255,255,0.15)',
+                padding: '2px 8px',
+                borderRadius: 6,
+                fontSize: 14,
+                fontFamily: 'monospace',
+                color: 'rgba(255,255,255,0.9)',
+                border: '1px solid rgba(255,255,255,0.1)'
+              }}>→</kbd>
+            </div>
+          </div>
+        </FadeIn>
+      )}
+
     </div>
   );
 }

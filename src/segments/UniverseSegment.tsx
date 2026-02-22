@@ -13,7 +13,7 @@ const seed = (n: number) => {
   return x - Math.floor(x);
 };
 
-function CosmicWeb() {
+function CosmicWeb({ visible }: { visible: boolean }) {
   const pointsRef = useRef<THREE.Points>(null);
 
   const { positions, colors } = useMemo(() => {
@@ -29,7 +29,7 @@ function CosmicWeb() {
     const edges: [THREE.Vector3, THREE.Vector3][] = [];
     for (let i = 0; i < nodes.length; i++) {
       for (let j = i + 1; j < nodes.length; j++) {
-        if (nodes[i].distanceTo(nodes[j]) < CONNECTION_THRESHOLD) {
+        if (nodes[i].distanceToSquared(nodes[j]) < CONNECTION_THRESHOLD * CONNECTION_THRESHOLD) {
           edges.push([nodes[i], nodes[j]]);
         }
       }
@@ -78,6 +78,7 @@ function CosmicWeb() {
   const tex = useMemo(() => getStarTexture(), []);
 
   useFrame((_, delta) => {
+    if (!visible) return;
     if (pointsRef.current) {
       pointsRef.current.rotation.y += delta * 0.002;
     }
@@ -156,7 +157,7 @@ function Superclusters() {
 }
 
 // Dense background field of distant galaxies — the "unthinkable amount" layer
-function DeepField() {
+function DeepField({ visible }: { visible: boolean }) {
   const pointsRef = useRef<THREE.Points>(null);
   const count = 200000;
 
@@ -195,6 +196,7 @@ function DeepField() {
   const tex = useMemo(() => getStarTexture(), []);
 
   useFrame((_, delta) => {
+    if (!visible) return;
     if (pointsRef.current) {
       pointsRef.current.rotation.y += delta * 0.001;
     }
@@ -237,8 +239,8 @@ interface UniverseSegmentProps {
 export function UniverseSegment({ visible }: UniverseSegmentProps) {
   return (
     <group visible={visible}>
-      <DeepField />
-      <CosmicWeb />
+      <DeepField visible={visible} />
+      <CosmicWeb visible={visible} />
       <Superclusters />
       <UniverseBoundary />
       <SoftStars count={20000} radius={600} minSize={0.3} maxSize={1.2} opacity={0.6} warmth={0.3} />

@@ -1,8 +1,9 @@
-import { Suspense, useState, useEffect, useRef, useCallback } from 'react';
+import { Suspense, useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import * as THREE from 'three';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Canvas, useFrame, useThree, useLoader } from '@react-three/fiber';
+import { TextureLoader } from 'three';
 import { useSpring } from '@react-spring/three';
-import { EffectComposer, Bloom, Vignette, Noise } from '@react-three/postprocessing';
+import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
 import { useSlideNavigation } from './hooks/useSlideNavigation';
 import { TextOverlay } from './components/TextOverlay';
 import { NavigationControls } from './components/NavigationControls';
@@ -12,6 +13,13 @@ import { EarthSegment } from './segments/EarthSegment';
 import { SolarSegment } from './segments/SolarSegment';
 import { GalaxySegment } from './segments/GalaxySegment';
 import { UniverseSegment } from './segments/UniverseSegment';
+
+// Preload Earth textures during intro animation so they're cached when EarthSegment mounts
+useLoader.preload(TextureLoader, [
+  'textures/earth_day_4k.jpg',
+  'textures/earth_night_4k.jpg',
+  'textures/earth_clouds_2k.jpg',
+]);
 
 const TOTAL_SLIDES = 11;
 
@@ -80,6 +88,7 @@ function CameraController({ currentSlide }: { currentSlide: number }) {
   const currentSegment = SLIDE_TO_SEGMENT[currentSlide];
   const prevSegmentRef = useRef(currentSegment);
   const segmentChanged = currentSegment !== prevSegmentRef.current;
+  const wasGalaxy = prevSegmentRef.current === 4;
   prevSegmentRef.current = currentSegment;
 
   const { pos, target, fov } = useSpring({
@@ -87,7 +96,7 @@ function CameraController({ currentSlide }: { currentSlide: number }) {
     target: [camState[3], camState[4], camState[5]] as [number, number, number],
     fov: camState[6],
     config: { mass: 2, tension: 20, friction: 24 },
-    immediate: segmentChanged,
+    immediate: segmentChanged && !(currentSegment === 5 && wasGalaxy),
   });
 
   useFrame(({ camera }, delta) => {
@@ -156,12 +165,12 @@ function SharedPostProcessing({ segment }: { segment: number }) {
         luminanceThreshold={isDeepSpace ? 0.3 : 0.5}
         luminanceSmoothing={0.9}
         radius={isDeepSpace ? 1.0 : 0.8}
+        mipmapBlur
       />
       <Vignette
         darkness={isDeepSpace ? 0.65 : 0.45}
         offset={0.3}
       />
-      <Noise opacity={0.012} />
     </EffectComposer>
   );
 }
@@ -185,19 +194,39 @@ function FogController({ segment, currentSlide }: { segment: number; currentSlid
   return null;
 }
 
+// Determine which segments to mount: current + adjacent at segment boundaries
+function getSegmentsToMount(currentSlide: number): Set<number> {
+  const currentSeg = SLIDE_TO_SEGMENT[currentSlide];
+  const segments = new Set([currentSeg]);
+
+  // Pre-mount next segment when on a boundary slide
+  if (currentSlide < TOTAL_SLIDES - 1) {
+    const nextSeg = SLIDE_TO_SEGMENT[currentSlide + 1];
+    if (nextSeg !== currentSeg) segments.add(nextSeg);
+  }
+  // Pre-mount previous segment when on a boundary slide
+  if (currentSlide > 0) {
+    const prevSeg = SLIDE_TO_SEGMENT[currentSlide - 1];
+    if (prevSeg !== currentSeg) segments.add(prevSeg);
+  }
+
+  return segments;
+}
+
 function SceneContent({ currentSlide }: { currentSlide: number }) {
   const currentSegment = SLIDE_TO_SEGMENT[currentSlide];
+  const mounted = useMemo(() => getSegmentsToMount(currentSlide), [currentSlide]);
 
   return (
     <>
       <CameraController currentSlide={currentSlide} />
       <FogController segment={currentSegment} currentSlide={currentSlide} />
 
-      <CitySegment currentSlide={currentSlide} visible={currentSegment === 0} />
-      <EarthSegment currentSlide={currentSlide} visible={currentSegment === 2} />
-      <SolarSegment currentSlide={currentSlide} visible={currentSegment === 3} />
-      <GalaxySegment currentSlide={currentSlide} visible={currentSegment === 4} />
-      <UniverseSegment currentSlide={currentSlide} visible={currentSegment === 5} />
+      {mounted.has(0) && <CitySegment currentSlide={currentSlide} visible={currentSegment === 0} />}
+      {mounted.has(2) && <EarthSegment currentSlide={currentSlide} visible={currentSegment === 2} />}
+      {mounted.has(3) && <SolarSegment currentSlide={currentSlide} visible={currentSegment === 3} />}
+      {mounted.has(4) && <GalaxySegment currentSlide={currentSlide} visible={currentSegment === 4} />}
+      {mounted.has(5) && <UniverseSegment currentSlide={currentSlide} visible={currentSegment === 5} />}
 
       <SharedPostProcessing segment={currentSegment} />
     </>
@@ -216,62 +245,65 @@ function IntroOverlay({ onComplete }: { onComplete: () => void }) {
   const FULL_SUBTITLE = "Closing the gap between what AI can do and how it's used.";
   const FOOTER_TEXT = "Finn Jennen & Lucas Fedronic — menius.space";
 
-  useEffect(() => {
-    // Initial delay before starting
-    if (phase === 'init') {
-      const timer = setTimeout(() => setPhase('typingTitle'), 800);
-      return () => clearTimeout(timer);
-    }
-  }, [phase]);
+  // Use refs for animation state to avoid re-renders just for logic
+  const startTimeRef = useRef<number | null>(null);
+  const requestRef = useRef<number>();
 
-  // Typing Title
   useEffect(() => {
-    if (phase === 'typingTitle') {
-      if (titleText.length < FULL_TITLE.length) {
-        const timer = setTimeout(() => {
-          setTitleText(FULL_TITLE.slice(0, titleText.length + 1));
-        }, 150);
-        return () => clearTimeout(timer);
-      } else {
-        // Pause before subtitle
-        const timer = setTimeout(() => setPhase('typingSubtitle'), 600);
-        return () => clearTimeout(timer);
+    const animate = (time: number) => {
+      if (!startTimeRef.current) startTimeRef.current = time;
+      const elapsed = time - startTimeRef.current;
+
+      if (phase === 'init') {
+        if (elapsed > 800) {
+          setPhase('typingTitle');
+          startTimeRef.current = null;
+        }
+      } else if (phase === 'typingTitle') {
+        // Type 1 char every 100ms
+        const charIndex = Math.floor(elapsed / 100);
+        if (charIndex <= FULL_TITLE.length) {
+          setTitleText(FULL_TITLE.slice(0, charIndex));
+        } else {
+          // Pause 600ms
+          if (elapsed > (FULL_TITLE.length * 100 + 600)) {
+            setPhase('typingSubtitle');
+            startTimeRef.current = null;
+          }
+        }
+      } else if (phase === 'typingSubtitle') {
+        // Type 1 char every 30ms
+        const charIndex = Math.floor(elapsed / 30);
+        if (charIndex <= FULL_SUBTITLE.length) {
+          setSubtitleText(FULL_SUBTITLE.slice(0, charIndex));
+        } else {
+          // Pause 800ms
+          if (elapsed > (FULL_SUBTITLE.length * 30 + 800)) {
+            setPhase('footer');
+            startTimeRef.current = null;
+          }
+        }
+      } else if (phase === 'footer') {
+        if (elapsed > 2500) {
+          setPhase('fadeout');
+          startTimeRef.current = null;
+        }
+      } else if (phase === 'fadeout') {
+        if (elapsed > 1000) {
+          setPhase('done');
+          onComplete();
+        }
       }
-    }
-  }, [phase, titleText]);
-
-  // Typing Subtitle
-  useEffect(() => {
-    if (phase === 'typingSubtitle') {
-      if (subtitleText.length < FULL_SUBTITLE.length) {
-        const timer = setTimeout(() => {
-          setSubtitleText(FULL_SUBTITLE.slice(0, subtitleText.length + 1));
-        }, 40);
-        return () => clearTimeout(timer);
-      } else {
-        // Pause before footer
-        const timer = setTimeout(() => setPhase('footer'), 800);
-        return () => clearTimeout(timer);
+      
+      if (phase !== 'done') {
+        requestRef.current = requestAnimationFrame(animate);
       }
-    }
-  }, [phase, subtitleText]);
+    };
 
-  // Show Footer & Finish
-  useEffect(() => {
-    if (phase === 'footer') {
-      const timer = setTimeout(() => setPhase('fadeout'), 2500);
-      return () => clearTimeout(timer);
-    }
-  }, [phase]);
-
-  useEffect(() => {
-    if (phase === 'fadeout') {
-      const timer = setTimeout(() => {
-        setPhase('done');
-        onComplete();
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
+    requestRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+    };
   }, [phase, onComplete]);
 
   if (phase === 'done') return null;
@@ -393,7 +425,7 @@ export function CosmicZoomDeck() {
   const [fadeOpacity, setFadeOpacity] = useState(0);
 
   useEffect(() => {
-    if (currentSegment !== prevSegmentRef.current) {
+    if (currentSegment !== prevSegmentRef.current && !(currentSegment === 5 && prevSegmentRef.current === 4)) {
       setFadeOpacity(1);
       const timer = setTimeout(() => setFadeOpacity(0), 500);
       prevSegmentRef.current = currentSegment;
@@ -417,7 +449,7 @@ export function CosmicZoomDeck() {
           stencil: false,
         }}
         camera={{ fov: 65, near: 0.01, far: 10000 }}
-        dpr={[1, 2]}
+        dpr={[1, 1.5]}
         style={{ position: 'absolute', inset: 0 }}
       >
         <Suspense fallback={null}>
