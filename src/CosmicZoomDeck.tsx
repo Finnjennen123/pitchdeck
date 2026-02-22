@@ -234,112 +234,95 @@ function SceneContent({ currentSlide }: { currentSlide: number }) {
 }
 
 // Intro animation phases
-type IntroPhase = 'init' | 'typingTitle' | 'typingSubtitle' | 'footer' | 'fadeout' | 'done';
-
+// We now use CSS animations for smoother performance during 3D load
 function IntroOverlay({ onComplete }: { onComplete: () => void }) {
-  const [phase, setPhase] = useState<IntroPhase>('init');
-  const [titleText, setTitleText] = useState('');
-  const [subtitleText, setSubtitleText] = useState('');
-  
   const FULL_TITLE = "Menius";
   const FULL_SUBTITLE = "Closing the gap between what AI can do and how it's used.";
   const FOOTER_TEXT = "Finn Jennen & Lucas Fedronic — menius.space";
 
-  // Use refs for animation state to avoid re-renders just for logic
-  const startTimeRef = useRef<number | null>(null);
-  const requestRef = useRef<number | undefined>(undefined);
+  const [fadingOut, setFadingOut] = useState(false);
 
   useEffect(() => {
-    const animate = (time: number) => {
-      if (!startTimeRef.current) startTimeRef.current = time;
-      const elapsed = time - startTimeRef.current;
+    // Total duration calculation
+    const TITLE_DURATION = FULL_TITLE.length * 100;
+    const SUBTITLE_DURATION = FULL_SUBTITLE.length * 30;
+    const TOTAL_TIME = 800 + TITLE_DURATION + 600 + SUBTITLE_DURATION + 800 + 2500; // ~7.1s
 
-      if (phase === 'init') {
-        if (elapsed > 800) {
-          setPhase('typingTitle');
-          startTimeRef.current = null;
-        }
-      } else if (phase === 'typingTitle') {
-        // Type 1 char every 100ms
-        const charIndex = Math.floor(elapsed / 100);
-        if (charIndex <= FULL_TITLE.length) {
-          setTitleText(FULL_TITLE.slice(0, charIndex));
-        } else {
-          // Pause 600ms
-          if (elapsed > (FULL_TITLE.length * 100 + 600)) {
-            setPhase('typingSubtitle');
-            startTimeRef.current = null;
-          }
-        }
-      } else if (phase === 'typingSubtitle') {
-        // Type 1 char every 30ms
-        const charIndex = Math.floor(elapsed / 30);
-        if (charIndex <= FULL_SUBTITLE.length) {
-          setSubtitleText(FULL_SUBTITLE.slice(0, charIndex));
-        } else {
-          // Pause 800ms
-          if (elapsed > (FULL_SUBTITLE.length * 30 + 800)) {
-            setPhase('footer');
-            startTimeRef.current = null;
-          }
-        }
-      } else if (phase === 'footer') {
-        if (elapsed > 2500) {
-          setPhase('fadeout');
-          startTimeRef.current = null;
-        }
-      } else if (phase === 'fadeout') {
-        if (elapsed > 1000) {
-          setPhase('done');
-          onComplete();
-        }
-      }
-      
-      if (phase !== 'done') {
-        requestRef.current = requestAnimationFrame(animate);
-      }
-    };
+    const fadeTimer = setTimeout(() => {
+      setFadingOut(true);
+    }, TOTAL_TIME);
 
-    requestRef.current = requestAnimationFrame(animate);
+    const doneTimer = setTimeout(() => {
+      onComplete();
+    }, TOTAL_TIME + 1000);
+
     return () => {
-      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+      clearTimeout(fadeTimer);
+      clearTimeout(doneTimer);
     };
-  }, [phase, onComplete]);
-
-  if (phase === 'done') return null;
+  }, [onComplete]);
 
   return (
-    <div style={{
+    <div className="intro-overlay-root" style={{
       position: 'absolute',
       inset: 0,
-      background: '#000',
       zIndex: 100,
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'center',
-      padding: '60px 80px',
-      opacity: phase === 'fadeout' ? 0 : 1,
-      transition: 'opacity 1s ease-in-out',
+      padding: 'max(40px, 4vw)',
+      paddingTop: 'max(40px, env(safe-area-inset-top) + 20px)',
+      paddingBottom: 'max(40px, env(safe-area-inset-bottom) + 20px)',
+      pointerEvents: 'none', // Allow clicks to pass through if needed, though usually blocking is fine
     }}>
+      {/* Background that fades out */}
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        background: '#000',
+        opacity: fadingOut ? 0 : 1,
+        transition: 'opacity 1s ease-in-out',
+        zIndex: -1,
+      }} />
+
+      <style>{`
+        @keyframes revealChar {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes revealFooter {
+          from { opacity: 0; }
+          to { opacity: 0.7; }
+        }
+        @media (max-width: 768px) {
+          .intro-overlay-root {
+            padding: max(16px, 3vw) !important;
+          }
+        }
+      `}</style>
+
       {/* Title Container */}
-      <div style={{ position: 'relative', marginBottom: 24 }}>
+      <div style={{ position: 'relative', marginBottom: 24, width: '100%', display: 'flex', justifyContent: 'center' }}>
+        {/* Ghost Title for Layout */}
         <h1 style={{
            fontFamily: "'Playfair Display', serif",
-           fontSize: 160,
+           fontSize: 'min(180px, 20vw)',
            fontWeight: 600,
            letterSpacing: '-0.02em',
            lineHeight: 1.1,
            fontStyle: 'italic',
-           opacity: 0, // Ghost
+           opacity: 0,
            margin: 0,
            pointerEvents: 'none',
         }}>
           {FULL_TITLE}
         </h1>
+        
+        {/* Animated Title */}
         <h1 style={{
            fontFamily: "'Playfair Display', serif",
-           fontSize: 160,
+           fontSize: 'min(180px, 20vw)',
            fontWeight: 600,
            color: '#ffffff',
            letterSpacing: '-0.02em',
@@ -353,28 +336,37 @@ function IntroOverlay({ onComplete }: { onComplete: () => void }) {
            textAlign: 'center',
            margin: 0,
         }}>
-          {titleText}
+          {FULL_TITLE.split('').map((char, i) => (
+            <span key={i} style={{
+              opacity: 0,
+              animation: `revealChar 0.05s forwards ${800 + i * 100}ms`
+            }}>{char}</span>
+          ))}
         </h1>
       </div>
 
       {/* Subtitle Container */}
-      <div style={{ position: 'relative', maxWidth: 800, width: '100%' }}>
+      <div style={{ position: 'relative', maxWidth: '90vw', width: '100%' }}>
+        {/* Ghost Subtitle */}
         <p style={{
            fontFamily: "'Plus Jakarta Sans', sans-serif",
-           fontSize: 32,
+           fontSize: 'min(24px, 5.5vw)',
            fontWeight: 500,
            textAlign: 'center',
            lineHeight: 1.4,
            whiteSpace: 'pre-line',
-           opacity: 0, // Ghost
+           opacity: 0,
            margin: 0,
            pointerEvents: 'none',
+           padding: '0 min(60px, 10vw)',
         }}>
           {FULL_SUBTITLE}
         </p>
+
+        {/* Animated Subtitle */}
         <p style={{
            fontFamily: "'Plus Jakarta Sans', sans-serif",
-           fontSize: 32,
+           fontSize: 'min(24px, 5.5vw)',
            fontWeight: 500,
            color: 'rgba(255,255,255,0.9)',
            textAlign: 'center',
@@ -386,8 +378,14 @@ function IntroOverlay({ onComplete }: { onComplete: () => void }) {
            left: 0,
            width: '100%',
            margin: 0,
+           padding: '0 min(60px, 10vw)',
         }}>
-          {subtitleText}
+          {FULL_SUBTITLE.split('').map((char, i) => (
+            <span key={i} style={{
+              opacity: 0,
+              animation: `revealChar 0.05s forwards ${2000 + i * 30}ms`
+            }}>{char}</span>
+          ))}
         </p>
       </div>
       
@@ -395,8 +393,8 @@ function IntroOverlay({ onComplete }: { onComplete: () => void }) {
       <div style={{
         position: 'absolute',
         bottom: 60,
-        opacity: phase === 'footer' || phase === 'fadeout' ? 0.7 : 0,
-        transition: 'opacity 1.5s ease-out',
+        opacity: 0,
+        animation: `revealFooter 1.5s ease-out forwards ${4600}ms`
       }}>
          <p style={{ 
            fontFamily: "'Inter', sans-serif",
@@ -412,14 +410,30 @@ function IntroOverlay({ onComplete }: { onComplete: () => void }) {
 }
 
 export function CosmicZoomDeck() {
-  const { currentSlide, next, prev, transitionState, transitionData } = useSlideNavigation(TOTAL_SLIDES);
+  const { currentSlide, next, prev, goToSlide, transitionState, transitionData } = useSlideNavigation(TOTAL_SLIDES);
+  
+  // Expose navigation for Puppeteer/Automation
+  useEffect(() => {
+    (window as any).goToSlide = goToSlide;
+    (window as any).currentSlide = currentSlide;
+  }, [goToSlide, currentSlide]);
+
   const currentSegment = SLIDE_TO_SEGMENT[currentSlide];
   const prevSegmentRef = useRef(currentSegment);
   const [introComplete, setIntroComplete] = useState(false);
+  const [justFinishedIntro, setJustFinishedIntro] = useState(false);
 
   const handleIntroComplete = useCallback(() => {
     setIntroComplete(true);
+    setJustFinishedIntro(true);
   }, []);
+
+  // Reset justFinishedIntro when leaving the first slide
+  useEffect(() => {
+    if (currentSlide > 0 && justFinishedIntro) {
+      setJustFinishedIntro(false);
+    }
+  }, [currentSlide, justFinishedIntro]);
 
   // Fade overlay when scene segment changes
   const [fadeOpacity, setFadeOpacity] = useState(0);
@@ -435,9 +449,10 @@ export function CosmicZoomDeck() {
 
   return (
     <div style={{
-      width: '100vw',
-      height: '100vh',
-      position: 'relative',
+      position: 'fixed', // Use fixed to ensure full viewport coverage
+      inset: 0,
+      width: '100%',
+      height: '100%',
       background: '#000',
       overflow: 'hidden',
     }}>
@@ -447,6 +462,7 @@ export function CosmicZoomDeck() {
           alpha: false,
           powerPreference: 'high-performance',
           stencil: false,
+          preserveDrawingBuffer: true, // Required for screenshots/PDF export
         }}
         camera={{ fov: 65, near: 0.01, far: 10000 }}
         dpr={[1, 1.5]}
@@ -471,7 +487,7 @@ export function CosmicZoomDeck() {
         zIndex: 5,
       }} />
 
-      {introComplete && <TextOverlay currentSlide={currentSlide} transitionState={transitionState} transitionData={transitionData} />}
+      {introComplete && <TextOverlay currentSlide={currentSlide} transitionState={transitionState} transitionData={transitionData} justFinishedIntro={justFinishedIntro} />}
 
       {introComplete && (
         <NavigationControls

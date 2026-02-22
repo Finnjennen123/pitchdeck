@@ -14,6 +14,8 @@ export function useSlideNavigation(totalSlides: number) {
   const slideRef = useRef(0);
   const lastScrollTime = useRef(0);
   const overscrollAccumulator = useRef(0);
+  const touchStart = useRef<{ y: number; time: number; scrollable: HTMLElement | null }>({ y: 0, time: 0, scrollable: null });
+  const isSwiping = useRef(false);
   const OVERSCROLL_THRESHOLD = 50; // Increased threshold for "margin" feel
 
   // Keep ref in sync with state
@@ -125,27 +127,86 @@ export function useSlideNavigation(totalSlides: number) {
       }
     };
 
-    let touchStartY = 0;
-    const handleTouchStart = (e: TouchEvent) => {
-      touchStartY = e.touches[0].clientY;
-    };
-    const handleTouchEnd = (e: TouchEvent) => {
-      const deltaY = touchStartY - e.changedTouches[0].clientY;
-      if (Math.abs(deltaY) > 50) {
-        if (deltaY > 0) next();
-        else prev();
+    const getScrollParent = (node: HTMLElement | null): HTMLElement | null => {
+      while (node && node !== document.body) {
+        const style = window.getComputedStyle(node);
+        const overflowY = style.overflowY;
+        const isScrollable = (overflowY === 'auto' || overflowY === 'scroll') && node.scrollHeight > node.clientHeight;
+        
+        if (isScrollable) {
+          return node;
+        }
+        node = node.parentElement;
       }
+      return null;
+    };
+
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStart.current = {
+        y: e.touches[0].clientY,
+        time: Date.now(),
+        scrollable: getScrollParent(e.target as HTMLElement)
+      };
+      isSwiping.current = false;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      const currentY = e.touches[0].clientY;
+      const deltaY = touchStart.current.y - currentY; // Positive = Swipe Up (Scroll Down)
+      const scrollable = touchStart.current.scrollable;
+
+      // Determine if we should allow native scroll
+      let allowScroll = false;
+
+      if (scrollable) {
+        const atTop = scrollable.scrollTop <= 0;
+        const atBottom = Math.abs(scrollable.scrollHeight - scrollable.scrollTop - scrollable.clientHeight) < 2.0;
+
+        if (deltaY > 0) { // Swiping Up (Trying to scroll down)
+          if (!atBottom) allowScroll = true;
+        } else if (deltaY < 0) { // Swiping Down (Trying to scroll up)
+          if (!atTop) allowScroll = true;
+        }
+      }
+
+      if (allowScroll) {
+        // Let native scroll happen, don't flag as slide swipe
+        isSwiping.current = false;
+        // Do NOT prevent default
+      } else {
+        // We are at boundary or not scrollable -> prevent default (stop bounce) and flag as swipe
+        if (e.cancelable) e.preventDefault();
+        isSwiping.current = true;
+      }
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (!isSwiping.current) return;
+
+      const deltaY = touchStart.current.y - e.changedTouches[0].clientY;
+      const elapsed = Date.now() - touchStart.current.time;
+      const absDelta = Math.abs(deltaY);
+
+      // Same thresholds as before
+      if (absDelta > 80 || (absDelta > 40 && elapsed < 300)) {
+        if (deltaY > 0) next(); // Swipe Up -> Next Slide
+        else prev(); // Swipe Down -> Prev Slide
+      }
+      
+      isSwiping.current = false;
     };
 
     window.addEventListener('keydown', handleKey);
     window.addEventListener('wheel', handleWheel, { passive: false });
-    window.addEventListener('touchstart', handleTouchStart);
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
     window.addEventListener('touchend', handleTouchEnd);
 
     return () => {
       window.removeEventListener('keydown', handleKey);
       window.removeEventListener('wheel', handleWheel);
       window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('touchend', handleTouchEnd);
     };
   }, [next, prev]);

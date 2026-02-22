@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface SlideContent {
   headerTitle?: string;
@@ -13,6 +13,7 @@ interface SlideContent {
 
   funnelSteps?: string[];
   videoEmbed?: string;
+  videoUrl?: string;
 
   columns?: {
     title?: string;
@@ -69,7 +70,7 @@ const SLIDE_CONTENT: SlideContent[] = [
         image: 'images/finn.jpg',
         bullets: [
           '18 years old',
-          'From ages 14-16 sold 20,000+ Belgian waffles doing $45K in sales.',
+          'From ages 13-16 sold 20,000+ Belgian waffles doing $45K in sales.',
           'Moved solo to Bali to build then made the jump to SF when the room wasn\'t right.',
           'In three weeks shipped product, found co-founder, got first customers.',
           'AI power user, obsessed with education, user experience, data driven decisions, speed and revenue.'
@@ -163,6 +164,7 @@ const SLIDE_CONTENT: SlideContent[] = [
     type: 'video',
     position: 'center',
     videoEmbed: 'https://www.youtube.com/embed/s6-YgvXSVZM',
+    videoUrl: 'https://youtu.be/s6-YgvXSVZM',
   },
   // Slide 6: Strategy - The Funnel
   {
@@ -256,9 +258,22 @@ const FadeIn = ({ show, delay, children, style = {} }: { show: boolean; delay: n
 
 export type TransitionState = 'idle' | 'exiting' | 'moving';
 
-export function TextOverlay({ currentSlide, transitionState, transitionData }: { currentSlide: number; transitionState: TransitionState; transitionData?: { from: number; to: number } | null }) {
+export function TextOverlay({ currentSlide, transitionState, transitionData, justFinishedIntro }: { currentSlide: number; transitionState: TransitionState; transitionData?: { from: number; to: number } | null; justFinishedIntro?: boolean }) {
   const visible = transitionState === 'idle';
   const content = SLIDE_CONTENT[currentSlide];
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setIsTouchDevice('ontouchstart' in window);
+  }, []);
+
+  // Reset scroll position when slide changes
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = 0;
+    }
+  }, [currentSlide]);
 
   if (!content) return null;
 
@@ -307,6 +322,7 @@ export function TextOverlay({ currentSlide, transitionState, transitionData }: {
   const isBottom = content.position.includes('bottom');
   const isTitleSlide = currentSlide === 0;
   const isBrightSlide = [6, 7, 8].includes(currentSlide);
+  const isIntroSkip = justFinishedIntro && isTitleSlide;
 
   // Base delay for stagger
   let delayCounter = 0;
@@ -318,6 +334,8 @@ export function TextOverlay({ currentSlide, transitionState, transitionData }: {
 
   return (
     <div
+      ref={containerRef}
+      className="text-overlay-root"
       style={{
         position: 'absolute',
         inset: 0,
@@ -326,12 +344,15 @@ export function TextOverlay({ currentSlide, transitionState, transitionData }: {
         justifyContent: 'flex-start',
         alignItems: 'stretch',
         padding: 'max(40px, 4vw)',
+        paddingTop: 'max(40px, env(safe-area-inset-top) + 20px)',
+        paddingBottom: 'max(40px, env(safe-area-inset-bottom) + 20px)',
         pointerEvents: 'auto',
         zIndex: 10,
         textAlign: isCenter ? 'center' : isLeft ? 'left' : 'right',
         color: '#fff',
         overflowY: 'auto',
         overflowX: 'hidden',
+        WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
       }}
     >
       {/* Header Title (Top of Page) */}
@@ -368,14 +389,16 @@ export function TextOverlay({ currentSlide, transitionState, transitionData }: {
         marginTop: isBottom ? 'auto' : 'auto',
         marginBottom: isBottom ? 0 : 'auto',
         alignItems: isCenter ? 'center' : isLeft ? 'flex-start' : 'flex-end',
+        justifyContent: isBottom ? 'flex-end' : 'center',
         width: '100%',
+        textAlign: isCenter ? 'center' : 'inherit' // Ensure text is centered if position is center
       }}>
         {/* Title */}
         {content.title && (
-          <FadeIn show={showTitle} delay={getDelay()}>
+          <FadeIn show={showTitle} delay={isIntroSkip ? 0 : getDelay()} style={isIntroSkip ? { opacity: 1, transform: 'none', transition: 'none' } : undefined}>
             <h1 style={{
               fontFamily: isTitleSlide ? "'Playfair Display', serif" : "'Plus Jakarta Sans', sans-serif",
-              fontSize: isTitleSlide ? 160 : 52,
+              fontSize: isTitleSlide ? 'min(180px, 20vw)' : 'min(52px, 8vw)',
               fontWeight: isTitleSlide ? 600 : 700,
               fontStyle: isTitleSlide ? 'italic' : 'normal',
               color: '#fff',
@@ -385,6 +408,9 @@ export function TextOverlay({ currentSlide, transitionState, transitionData }: {
               lineHeight: 1.1,
               maxWidth: isTitleSlide ? 1000 : 900,
               whiteSpace: 'pre-line', // Allow newlines in title
+              marginLeft: 'auto', // Auto margins for true centering
+              marginRight: 'auto', // Auto margins for true centering
+              textAlign: 'center', // Explicitly center text content
             }}>
               {content.title}
             </h1>
@@ -393,19 +419,23 @@ export function TextOverlay({ currentSlide, transitionState, transitionData }: {
 
         {/* Subtitle */}
         {content.subtitle && (
-          <FadeIn show={showSubtitle} delay={content.subtitleBox ? 0 : getDelay()} style={content.subtitleBox ? {
-            background: 'rgba(255,255,255,0.03)',
-            backdropFilter: 'blur(20px)',
-            padding: '32px 40px',
-            borderRadius: 24,
-            border: '1px solid rgba(255,255,255,0.08)',
-            maxWidth: 1000,
-            width: '100%',
-            marginBottom: 32,
-          } : undefined}>
+          <FadeIn 
+            show={showSubtitle} 
+            delay={isIntroSkip ? 0 : (content.subtitleBox ? 0 : getDelay())} 
+            style={isIntroSkip ? { opacity: 1, transform: 'none', transition: 'none' } : (content.subtitleBox ? {
+              background: 'rgba(255,255,255,0.03)',
+              backdropFilter: 'blur(20px)',
+              padding: 'clamp(20px, 4vw, 32px) clamp(24px, 5vw, 40px)',
+              borderRadius: 24,
+              border: '1px solid rgba(255,255,255,0.08)',
+              maxWidth: 1000,
+              width: '100%',
+              marginBottom: 32,
+            } : undefined)}
+          >
             <p style={{
               fontFamily: "'Plus Jakarta Sans', sans-serif",
-              fontSize: isTitleSlide ? 32 : 24,
+              fontSize: isTitleSlide ? 'min(24px, 5.5vw)' : 'min(24px, 5vw)',
               fontWeight: isTitleSlide ? 500 : 400,
               color: isTitleSlide ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.85)',
               textShadow: '0 0 40px rgba(0,0,0,0.8), 0 2px 10px rgba(0,0,0,0.6)',
@@ -415,6 +445,11 @@ export function TextOverlay({ currentSlide, transitionState, transitionData }: {
               maxWidth: content.subtitleBox ? '100%' : (isTitleSlide ? 800 : 700),
               marginBottom: content.subtitleBox ? 0 : (isTitleSlide ? 0 : 32),
               margin: 0,
+              paddingRight: isTitleSlide ? 'min(60px, 10vw)' : 0, // Avoid overlap with nav dots on mobile
+              paddingLeft: isTitleSlide ? 'min(60px, 10vw)' : 0, // Symmetric padding
+              marginLeft: 'auto', // Auto margins for true centering
+              marginRight: 'auto', // Auto margins for true centering
+              textAlign: 'center', // Explicitly center text content
             }}>
               {content.subtitle}
             </p>
@@ -434,7 +469,7 @@ export function TextOverlay({ currentSlide, transitionState, transitionData }: {
           }}>
             {content.columns.map((col, i) => (
               <FadeIn key={i} show={visible} delay={getDelay()} style={{
-                flex: '1 1 300px',
+                flex: '1 1 min(300px, 100%)',
                 background: isBrightSlide ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.03)',
                 backdropFilter: 'blur(20px)',
                 padding: 'clamp(24px, 3vw, 40px)',
@@ -470,7 +505,7 @@ export function TextOverlay({ currentSlide, transitionState, transitionData }: {
                   {col.title && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                       <h3 style={{
-                        fontSize: 28,
+                        fontSize: 'min(28px, 6vw)',
                         fontWeight: 600,
                         fontFamily: "'Playfair Display', serif",
                         margin: 0,
@@ -479,7 +514,7 @@ export function TextOverlay({ currentSlide, transitionState, transitionData }: {
                         {col.title.split(',')[0]}
                       </h3>
                       <span style={{
-                        fontSize: 16,
+                        fontSize: 'min(16px, 4vw)',
                         fontWeight: 500,
                         color: 'rgba(255,255,255,0.5)',
                         textTransform: 'uppercase',
@@ -518,7 +553,7 @@ export function TextOverlay({ currentSlide, transitionState, transitionData }: {
                 )}
 
                 {/* Body Text */}
-                {col.body && <p style={{ fontSize: 18, lineHeight: 1.6, whiteSpace: 'pre-line', color: 'rgba(255,255,255,0.9)', marginTop: 24, fontStyle: 'italic' }}>{col.body}</p>}
+                {col.body && <p style={{ fontSize: 'min(18px, 4.5vw)', lineHeight: 1.6, whiteSpace: 'pre-line', color: 'rgba(255,255,255,0.9)', marginTop: 24, fontStyle: 'italic' }}>{col.body}</p>}
               </FadeIn>
             ))}
           </div>
@@ -545,7 +580,7 @@ export function TextOverlay({ currentSlide, transitionState, transitionData }: {
             backdropFilter: 'blur(24px)',
             border: '1px solid rgba(255,255,255,0.08)',
             borderRadius: 32,
-            padding: '48px',
+            padding: 'clamp(24px, 5vw, 48px)',
             boxShadow: '0 4px 24px -1px rgba(0, 0, 0, 0.2)',
             display: 'flex',
             flexDirection: 'column',
@@ -554,7 +589,7 @@ export function TextOverlay({ currentSlide, transitionState, transitionData }: {
             {content.listItems.map((item, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
                 <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#fff', marginTop: 10, flexShrink: 0 }} />
-                <p style={{ fontSize: 24, lineHeight: 1.5, color: 'rgba(255,255,255,0.95)', margin: 0, fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 400, fontStyle: 'italic' }}>{item}</p>
+                <p style={{ fontSize: 'min(24px, 5vw)', lineHeight: 1.5, color: 'rgba(255,255,255,0.95)', margin: 0, fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 400, fontStyle: 'italic' }}>{item}</p>
               </div>
             ))}
           </FadeIn>
@@ -573,42 +608,45 @@ export function TextOverlay({ currentSlide, transitionState, transitionData }: {
           }}>
             {content.funnelSteps.map((step, i) => {
               const widthPercentage = 100 - (i * 20); // 100%, 80%, 60%, 40%
-              // Calculate clip path for trapezoid effect
-              // We want top width to be wider than bottom width
-              // But to make them stack nicely, we'll just use rounded rectangles that decrease in width
-              // as "boring blocks" was the complaint, maybe we can add a subtle gradient or border
 
               return (
-                <div key={i} style={{
-                  width: `${widthPercentage}%`,
-                  minWidth: 320,
-                  background: 'rgba(255,255,255,0.05)', // Lighter background
-                  backdropFilter: 'blur(10px)',
-                  padding: '20px',
-                  marginBottom: 8,
-                  borderRadius: 12,
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  textAlign: 'center',
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-                  position: 'relative',
-                  zIndex: content.funnelSteps!.length - i,
-                  // Add a subtle gradient to make it less "boring"
-                  backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%)',
-                }}>
-                  <span style={{
-                    fontSize: 22,
-                    fontWeight: 500,
-                    color: '#fff',
-                    fontFamily: "'Plus Jakarta Sans', sans-serif",
-                    letterSpacing: '-0.01em',
-                    textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                <React.Fragment key={i}>
+                  {i > 0 && (
+                    <div style={{ display: 'flex', justifyContent: 'center', padding: '4px 0' }}>
+                      <svg width="24" height="16" viewBox="0 0 24 16" fill="none">
+                        <path d="M12 14L2 4L4.8 1.2L12 8.4L19.2 1.2L22 4L12 14Z" fill="rgba(255,255,255,0.4)" />
+                      </svg>
+                    </div>
+                  )}
+                  <div className="funnel-block" style={{
+                    width: `${widthPercentage}%`,
+                    minWidth: 'min(320px, 100%)',
+                    background: 'rgba(255,255,255,0.05)',
+                    backdropFilter: 'blur(10px)',
+                    padding: '20px',
+                    borderRadius: 12,
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    textAlign: 'center',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                    position: 'relative',
+                    zIndex: content.funnelSteps!.length - i,
+                    backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%)',
                   }}>
-                    {step}
-                  </span>
-                </div>
+                    <span style={{
+                      fontSize: 'min(22px, 5vw)',
+                      fontWeight: 500,
+                      color: '#fff',
+                      fontFamily: "'Plus Jakarta Sans', sans-serif",
+                      letterSpacing: '-0.01em',
+                      textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                    }}>
+                      {step}
+                    </span>
+                  </div>
+                </React.Fragment>
               );
             })}
           </FadeIn>
@@ -636,59 +674,60 @@ export function TextOverlay({ currentSlide, transitionState, transitionData }: {
 
         {/* Stats */}
         {content.stats && (
-          <FadeIn show={visible} delay={getDelay()} style={{
-            display: 'flex',
-            gap: 64,
-            marginTop: 24,
-            flexWrap: 'wrap',
-            justifyContent: 'center',
-            maxWidth: 1000,
-            background: isBrightSlide ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.03)',
-            backdropFilter: 'blur(24px)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: 32,
-            padding: '48px',
-            boxShadow: '0 4px 24px -1px rgba(0, 0, 0, 0.2)',
-          }}>
-            {content.stats.map((stat, i) => (
-              <div key={i} style={{ textAlign: 'center' }}>
-                <div style={{
-                  fontFamily: "'Inter', sans-serif",
-                  fontSize: 52,
-                  fontWeight: 800,
-                  color: '#fff',
-                  textShadow: '0 0 40px rgba(100,180,255,0.4), 0 0 80px rgba(100,180,255,0.2)',
-                  lineHeight: 1.2,
-                }}>
-                  {stat.value}
+          <div className="stats-container" style={{ marginTop: 24, maxWidth: 1000, width: '100%', display: 'flex', justifyContent: 'center' }}>
+            <FadeIn show={visible} delay={getDelay()} style={{
+              display: 'flex',
+              gap: 64,
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+              width: '100%',
+              background: isBrightSlide ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.03)',
+              backdropFilter: 'blur(24px)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 32,
+              padding: '48px',
+              boxShadow: '0 4px 24px -1px rgba(0, 0, 0, 0.2)',
+            }}>
+              {content.stats.map((stat, i) => (
+                <div key={i} style={{ textAlign: 'center' }}>
+                  <div style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: 'min(52px, 12vw)',
+                    fontWeight: 800,
+                    color: '#fff',
+                    textShadow: '0 0 40px rgba(100,180,255,0.4), 0 0 80px rgba(100,180,255,0.2)',
+                    lineHeight: 1.2,
+                  }}>
+                    {stat.value}
+                  </div>
+                  <div style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: 14,
+                    fontWeight: 500,
+                    color: 'rgba(255,255,255,0.55)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.12em',
+                    marginTop: 4,
+                    maxWidth: 150,
+                    margin: '4px auto 0'
+                  }}>
+                    {stat.label}
+                  </div>
                 </div>
-                <div style={{
-                  fontFamily: "'Inter', sans-serif",
-                  fontSize: 14,
-                  fontWeight: 500,
-                  color: 'rgba(255,255,255,0.55)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.12em',
-                  marginTop: 4,
-                  maxWidth: 150,
-                  margin: '4px auto 0'
-                }}>
-                  {stat.label}
-                </div>
-              </div>
-            ))}
-          </FadeIn>
+              ))}
+            </FadeIn>
+          </div>
         )}
 
         {/* Contact Info */}
         {content.contactInfo && (
-          <div style={{ display: 'flex', gap: 80, marginTop: 40, justifyContent: 'center' }}>
+          <div className="contact-grid" style={{ display: 'flex', gap: 80, marginTop: 40, justifyContent: 'center' }}>
             {content.contactInfo.map((contact, i) => (
               <FadeIn key={i} show={visible} delay={getDelay()} style={{ textAlign: 'center' }}>
-                <h3 style={{ fontSize: 28, fontWeight: 700 }}>{contact.name}</h3>
-                <p style={{ fontSize: 18, color: 'rgba(255,255,255,0.6)', marginBottom: 16 }}>{contact.role}</p>
-                <p style={{ fontSize: 16 }}>{contact.email}</p>
-                <p style={{ fontSize: 16 }}>{contact.phone}</p>
+                <h3 style={{ fontSize: 'min(28px, 7vw)', fontWeight: 700 }}>{contact.name}</h3>
+                <p style={{ fontSize: 'min(18px, 4.5vw)', color: 'rgba(255,255,255,0.6)', marginBottom: 16 }}>{contact.role}</p>
+                <p style={{ fontSize: 16, userSelect: 'text', cursor: 'text' }}>{contact.email}</p>
+                <p style={{ fontSize: 16, userSelect: 'text', cursor: 'text' }}>{contact.phone}</p>
               </FadeIn>
             ))}
           </div>
@@ -696,28 +735,72 @@ export function TextOverlay({ currentSlide, transitionState, transitionData }: {
 
         {/* Video Embed */}
         {content.type === 'video' && content.videoEmbed && (
-          <FadeIn show={visible} delay={getDelay()} style={{
-            marginTop: 20,
-            width: '100%',
-            maxWidth: 900,
-            aspectRatio: '16/9',
-            background: 'rgba(0,0,0,0.3)',
-            borderRadius: 24,
-            overflow: 'hidden',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
-            border: '1px solid rgba(255,255,255,0.1)',
-          }}>
-            <iframe
-              width="100%"
-              height="100%"
-              src={content.videoEmbed}
-              title="YouTube video player"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-              style={{ display: 'block' }}
-            />
-          </FadeIn>
+          <>
+            <FadeIn show={visible} delay={getDelay()} style={{
+              marginTop: 20,
+              width: '100%',
+              maxWidth: 900,
+              aspectRatio: '16/9',
+              background: 'rgba(0,0,0,0.3)',
+              borderRadius: 24,
+              overflow: 'hidden',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+              border: '1px solid rgba(255,255,255,0.1)',
+            }}>
+              <iframe
+                width="100%"
+                height="100%"
+                src={content.videoEmbed}
+                title="YouTube video player"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                style={{ display: 'block' }}
+              />
+            </FadeIn>
+            
+            {content.videoUrl && (
+              <FadeIn show={visible} delay={getDelay()} style={{ marginTop: 24, textAlign: 'center' }}>
+                <div style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  background: 'rgba(0,0,0,0.4)',
+                  backdropFilter: 'blur(10px)',
+                  padding: '12px 24px',
+                  borderRadius: 12,
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  pointerEvents: 'auto',
+                }}>
+                  <span style={{
+                    fontFamily: "'Plus Jakarta Sans', sans-serif",
+                    fontSize: 14,
+                    color: 'rgba(255,255,255,0.5)',
+                    fontWeight: 500,
+                  }}>
+                    Watch on YouTube:
+                  </span>
+                  <a 
+                    href={content.videoUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    style={{
+                      fontFamily: "'Plus Jakarta Sans', sans-serif",
+                      fontSize: 16,
+                      color: '#fff',
+                      textDecoration: 'none',
+                      userSelect: 'text',
+                      cursor: 'text',
+                      fontWeight: 500,
+                    }}
+                    onClick={(e) => e.stopPropagation()} // Prevent slide navigation if clickable area overlaps
+                  >
+                    {content.videoUrl}
+                  </a>
+                </div>
+              </FadeIn>
+            )}
+          </>
         )}
 
         {/* Email CTA */}
@@ -782,6 +865,7 @@ export function TextOverlay({ currentSlide, transitionState, transitionData }: {
         <FadeIn show={showFooter} delay={getDelay()} style={{
           position: isTitleSlide ? 'absolute' : 'relative',
           bottom: isTitleSlide ? 100 : 'auto',
+          left: 0, // Ensure it's centered relative to the screen, not the padded container
           marginTop: isTitleSlide ? 0 : 60,
           opacity: 0.9,
           width: '100%',
@@ -809,11 +893,11 @@ export function TextOverlay({ currentSlide, transitionState, transitionData }: {
           </p>
         </FadeIn>
       )}
-      {/* Navigation Hint - Only on Title Slide */}
+      {/* Navigation Hint */}
       {isTitleSlide && (
         <FadeIn show={visible} delay={500} style={{
           position: 'absolute',
-          bottom: 30,
+          bottom: isTouchDevice ? 'max(40px, env(safe-area-inset-bottom) + 40px)' : 30,
           left: 0,
           right: 0,
           display: 'flex',
@@ -821,49 +905,106 @@ export function TextOverlay({ currentSlide, transitionState, transitionData }: {
           pointerEvents: 'none',
           zIndex: 100,
         }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-            background: 'rgba(0,0,0,0.6)',
-            padding: '12px 24px',
-            borderRadius: 99,
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255,255,255,0.2)',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
-          }}>
-            <span style={{
-              fontSize: 16,
-              fontFamily: "'Plus Jakarta Sans', sans-serif",
-              color: 'rgba(255,255,255,0.95)',
-              fontWeight: 500,
-              letterSpacing: '0.02em'
+          {!isTouchDevice ? (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              background: 'rgba(0,0,0,0.6)',
+              padding: '12px 24px',
+              borderRadius: 99,
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
             }}>
-              Use arrows to go back and forth
-            </span>
-            <div style={{ display: 'flex', gap: 6 }}>
-              <kbd style={{
-                background: 'rgba(255,255,255,0.15)',
-                padding: '2px 8px',
-                borderRadius: 6,
-                fontSize: 14,
-                fontFamily: 'monospace',
-                color: 'rgba(255,255,255,0.9)',
-                border: '1px solid rgba(255,255,255,0.1)'
-              }}>←</kbd>
-              <kbd style={{
-                background: 'rgba(255,255,255,0.15)',
-                padding: '2px 8px',
-                borderRadius: 6,
-                fontSize: 14,
-                fontFamily: 'monospace',
-                color: 'rgba(255,255,255,0.9)',
-                border: '1px solid rgba(255,255,255,0.1)'
-              }}>→</kbd>
+              <span style={{
+                fontSize: 16,
+                fontFamily: "'Plus Jakarta Sans', sans-serif",
+                color: 'rgba(255,255,255,0.95)',
+                fontWeight: 500,
+                letterSpacing: '0.02em'
+              }}>
+                Use arrows to go back and forth
+              </span>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <kbd style={{
+                  background: 'rgba(255,255,255,0.15)',
+                  padding: '2px 8px',
+                  borderRadius: 6,
+                  fontSize: 14,
+                  fontFamily: 'monospace',
+                  color: 'rgba(255,255,255,0.9)',
+                  border: '1px solid rgba(255,255,255,0.1)'
+                }}>←</kbd>
+                <kbd style={{
+                  background: 'rgba(255,255,255,0.15)',
+                  padding: '2px 8px',
+                  borderRadius: 6,
+                  fontSize: 14,
+                  fontFamily: 'monospace',
+                  color: 'rgba(255,255,255,0.9)',
+                  border: '1px solid rgba(255,255,255,0.1)'
+                }}>→</kbd>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 16,
+              opacity: 0.9
+            }}>
+              <style>{`
+                @keyframes pulsePop {
+                  0% { transform: scale(1); opacity: 0.8; }
+                  50% { transform: scale(1.05); opacity: 1; text-shadow: 0 0 15px rgba(255,255,255,0.6); }
+                  100% { transform: scale(1); opacity: 0.8; }
+                }
+              `}</style>
+
+              <span style={{
+                fontSize: 14,
+                fontFamily: "'Plus Jakarta Sans', sans-serif",
+                color: 'rgba(255,255,255,0.95)',
+                fontWeight: 600,
+                letterSpacing: '0.03em',
+                textShadow: '0 2px 4px rgba(0,0,0,0.5)',
+                textAlign: 'center',
+                animation: 'pulsePop 2s infinite ease-in-out'
+              }}>
+                Scroll up with your finger
+              </span>
+            </div>
+          )}
         </FadeIn>
       )}
+
+      {/* Mobile Responsive Styles */}
+      <style>{`
+        @media (max-width: 768px) {
+          .text-overlay-root {
+            padding: max(16px, 3vw) !important;
+          }
+          .cover-title {
+            font-size: min(72px, 18vw) !important;
+          }
+          .stats-container > div {
+            gap: 24px !important;
+            padding: 24px !important;
+          }
+          .stats-container > div > div > div:first-child {
+            font-size: 36px !important;
+          }
+          .contact-grid {
+            gap: 32px !important;
+            flex-direction: column !important;
+          }
+          .funnel-block {
+            min-width: min(320px, 85vw) !important;
+          }
+        }
+      `}</style>
 
     </div>
   );
