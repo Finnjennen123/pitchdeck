@@ -164,7 +164,6 @@ const SLIDE_CONTENT: SlideContent[] = [
     type: 'video',
     position: 'center',
     videoEmbed: 'https://www.youtube.com/embed/s6-YgvXSVZM',
-    videoUrl: 'https://youtu.be/s6-YgvXSVZM',
   },
   // Slide 6: Strategy - The Funnel
   {
@@ -302,7 +301,9 @@ export function TextOverlay({ currentSlide, transitionState, transitionData, jus
   if (transitionData && content.subtitle) {
     const fromSubtitle = SLIDE_CONTENT[transitionData.from]?.subtitle;
     const toSubtitle = SLIDE_CONTENT[transitionData.to]?.subtitle;
-    if (fromSubtitle === toSubtitle && fromSubtitle === content.subtitle) {
+    const fromSubtitleBox = SLIDE_CONTENT[transitionData.from]?.subtitleBox;
+    const toSubtitleBox = SLIDE_CONTENT[transitionData.to]?.subtitleBox;
+    if (fromSubtitle === toSubtitle && fromSubtitle === content.subtitle && fromSubtitleBox === toSubtitleBox) {
       showSubtitle = true;
     }
   }
@@ -321,7 +322,7 @@ export function TextOverlay({ currentSlide, transitionState, transitionData, jus
   const isLeft = content.position.includes('left');
   const isBottom = content.position.includes('bottom');
   const isTitleSlide = currentSlide === 0;
-  const isBrightSlide = [6, 7, 8].includes(currentSlide);
+  const isBrightSlide = [6, 8].includes(currentSlide);
   const isIntroSkip = justFinishedIntro && isTitleSlide;
 
   // Base delay for stagger
@@ -420,6 +421,7 @@ export function TextOverlay({ currentSlide, transitionState, transitionData, jus
         {/* Subtitle */}
         {content.subtitle && (
           <FadeIn 
+            key={`subtitle-${currentSlide}`}
             show={showSubtitle} 
             delay={isIntroSkip ? 0 : (content.subtitleBox ? 0 : getDelay())} 
             style={isIntroSkip ? { opacity: 1, transform: 'none', transition: 'none' } : (content.subtitleBox ? {
@@ -735,72 +737,28 @@ export function TextOverlay({ currentSlide, transitionState, transitionData, jus
 
         {/* Video Embed */}
         {content.type === 'video' && content.videoEmbed && (
-          <>
-            <FadeIn show={visible} delay={getDelay()} style={{
-              marginTop: 20,
-              width: '100%',
-              maxWidth: 900,
-              aspectRatio: '16/9',
-              background: 'rgba(0,0,0,0.3)',
-              borderRadius: 24,
-              overflow: 'hidden',
-              boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
-              border: '1px solid rgba(255,255,255,0.1)',
-            }}>
-              <iframe
-                width="100%"
-                height="100%"
-                src={content.videoEmbed}
-                title="YouTube video player"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-                style={{ display: 'block' }}
-              />
-            </FadeIn>
-            
-            {content.videoUrl && (
-              <FadeIn show={visible} delay={getDelay()} style={{ marginTop: 24, textAlign: 'center' }}>
-                <div style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 12,
-                  background: 'rgba(0,0,0,0.4)',
-                  backdropFilter: 'blur(10px)',
-                  padding: '12px 24px',
-                  borderRadius: 12,
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  pointerEvents: 'auto',
-                }}>
-                  <span style={{
-                    fontFamily: "'Plus Jakarta Sans', sans-serif",
-                    fontSize: 14,
-                    color: 'rgba(255,255,255,0.5)',
-                    fontWeight: 500,
-                  }}>
-                    Watch on YouTube:
-                  </span>
-                  <a 
-                    href={content.videoUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    style={{
-                      fontFamily: "'Plus Jakarta Sans', sans-serif",
-                      fontSize: 16,
-                      color: '#fff',
-                      textDecoration: 'none',
-                      userSelect: 'text',
-                      cursor: 'text',
-                      fontWeight: 500,
-                    }}
-                    onClick={(e) => e.stopPropagation()} // Prevent slide navigation if clickable area overlaps
-                  >
-                    {content.videoUrl}
-                  </a>
-                </div>
-              </FadeIn>
-            )}
-          </>
+          <FadeIn show={visible} delay={getDelay()} style={{
+            marginTop: 20,
+            width: '100%',
+            maxWidth: 900,
+            aspectRatio: '16/9',
+            background: 'rgba(0,0,0,0.3)',
+            borderRadius: 24,
+            overflow: 'hidden',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+            border: '1px solid rgba(255,255,255,0.1)',
+          }}>
+            <iframe
+              width="100%"
+              height="100%"
+              src={content.videoEmbed}
+              title="YouTube video player"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              style={{ display: 'block' }}
+            />
+          </FadeIn>
         )}
 
         {/* Email CTA */}
@@ -856,6 +814,33 @@ export function TextOverlay({ currentSlide, transitionState, transitionData, jus
                 {content.cta.text} →
               </a>
             </div>
+
+            {/* Also Download PDF Button - only for contact slide */}
+            {content.type === 'contact' && (
+              <div style={{ marginTop: 24, pointerEvents: 'auto' }}>
+                <a
+                  href="/pitch/Menius_Pitch_Deck.pdf"
+                  download="Menius_Pitch_Deck.pdf"
+                  style={{
+                    display: 'inline-block',
+                    padding: '12px 24px',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: 30,
+                    color: 'rgba(255, 255, 255, 0.8)',
+                    textDecoration: 'none',
+                    fontSize: 14,
+                    fontWeight: 500,
+                    fontFamily: "'Plus Jakarta Sans', sans-serif",
+                    transition: 'all 0.2s ease',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Also download as PDF again
+                </a>
+              </div>
+            )}
           </FadeIn>
         )}
       </div>

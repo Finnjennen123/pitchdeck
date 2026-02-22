@@ -43,13 +43,14 @@ function EarthGlobe({ visible }: { visible: boolean }) {
 
       {/* Atmosphere glow */}
       <mesh>
-        <sphereGeometry args={[EARTH_RADIUS + 0.5, 64, 64]} />
+        <sphereGeometry args={[EARTH_RADIUS + 0.35, 128, 128]} />
         <shaderMaterial
           vertexShader={atmosphereVertexShader}
           fragmentShader={atmosphereFragmentShader}
           side={THREE.BackSide}
           transparent
           depthWrite={false}
+          blending={THREE.AdditiveBlending}
         />
       </mesh>
     </group>
