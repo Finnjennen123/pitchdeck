@@ -244,6 +244,7 @@ export function UniverseSegment({ visible }: UniverseSegmentProps) {
       <Superclusters />
       <UniverseBoundary />
       <SoftStars count={20000} radius={600} minSize={0.3} maxSize={1.2} opacity={0.6} warmth={0.3} />
+      <SoftStars count={25000} radius={1200} minSize={0.4} maxSize={1.5} opacity={0.45} warmth={0.2} />
     </group>
   );
 }

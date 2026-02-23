@@ -9,7 +9,10 @@ interface SlideContent {
   footer?: string;
   position: 'center' | 'center-left' | 'center-right' | 'bottom-left' | 'bottom-right';
   dim?: boolean;
-  type?: 'default' | 'columns' | 'blocks' | 'list' | 'funnel' | 'stats' | 'contact' | 'video';
+  type?: 'default' | 'columns' | 'blocks' | 'list' | 'funnel' | 'stats' | 'contact' | 'video' | 'ask';
+
+  askAmount?: string;
+  askBullets?: { title: string; body: string }[];
 
   funnelSteps?: string[];
   videoEmbed?: string;
@@ -130,7 +133,7 @@ const SLIDE_CONTENT: SlideContent[] = [
     blocks: [
       {
         title: 'The Anxiety Cycle',
-        body: 'The fear of falling behind is real, but because the path to "learning AI" is so broken, people default to one of three losing states:\n\nThe 1%: Become power users through manual, obsessive trial and error.\n\nThe Majority: Buy a course or watch YouTube, realize it not learnable in these formats, and give up.\n\nThe Rest: Don\'t learn it at all or actively rebel against it.'
+        body: 'The fear of falling behind is real, but because the path to "learning AI" is so broken, people default to one of three losing states:\n\nThe 1%: Become power users through manual, obsessive trial and error.\n\nThe Majority: Buy a course or watch YouTube, realize it\'s not learnable in these formats, and give up.\n\nThe Rest: Don\'t learn it at all or actively rebel against it.'
       },
       {
         title: 'Every existing solution starts too broad.',
@@ -208,8 +211,8 @@ const SLIDE_CONTENT: SlideContent[] = [
     stats: [
       { value: '80', label: 'active users' },
       { value: '550', label: 'waitlisted' },
-      { value: '4', label: 'paying customers' },
-      { value: '$196', label: 'revenue' },
+      { value: '5', label: 'paying customers' },
+      { value: '$255', label: 'revenue' },
       { value: '$100K', label: 'VC offer' }
     ]
   },
@@ -224,7 +227,20 @@ const SLIDE_CONTENT: SlideContent[] = [
       'Long-term: We live inside users\' browsers and workflows. The usage analytics we collect — which tools people use, how they use them, where they get stuck — is data AI companies will pay for. We sell it or build better products from it.'
     ]
   },
-  // Slide 9: Thank You
+  // Slide 10: The Ask
+  {
+    headerTitle: 'The Ask',
+    type: 'ask',
+    position: 'center',
+    askAmount: "We're raising $400K",
+    askBullets: [
+      { title: 'Distribution at scale', body: 'Double down on the acquisition channels already converting, turning a working funnel into a repeatable growth engine.' },
+      { title: 'Accelerate product development', body: 'We have a backlog of features real paying users are asking for. This gets us to them faster.' },
+      { title: 'Expand our AI agent workforce', body: 'Deploy AI agents as internal employees across all aspects of the company so we move faster without bloating headcount.' },
+      { title: 'Land our first enterprise deal', body: 'Fund the sales cycles and custom integrations needed to close our first B2B customer and prove the per-seat model.' },
+    ],
+  },
+  // Slide 11: Thank You
   {
     headerTitle: 'Let\'s get in touch\n and close the gap.',
     type: 'contact',
@@ -759,6 +775,70 @@ export function TextOverlay({ currentSlide, transitionState, transitionData, jus
               style={{ display: 'block' }}
             />
           </FadeIn>
+        )}
+
+        {/* Ask */}
+        {content.type === 'ask' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 900, width: '100%', marginTop: 20 }}>
+            {/* Widget 1: Raise amount */}
+            <FadeIn show={visible} delay={getDelay()} style={{
+              background: 'rgba(255,255,255,0.03)',
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 32,
+              padding: 'clamp(28px, 5vw, 52px) clamp(24px, 5vw, 48px)',
+              boxShadow: '0 4px 24px -1px rgba(0, 0, 0, 0.2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <p style={{
+                fontFamily: "'Plus Jakarta Sans', sans-serif",
+                fontSize: 'min(52px, 9vw)',
+                fontWeight: 700,
+                color: '#fff',
+                margin: 0,
+                textAlign: 'center',
+                letterSpacing: '-0.02em',
+                textShadow: '0 0 60px rgba(0,0,0,0.6)',
+              }}>
+                {content.askAmount}
+              </p>
+            </FadeIn>
+            {/* Widget 2: Use of funds */}
+            <FadeIn show={visible} delay={getDelay()} style={{
+              background: 'rgba(255,255,255,0.03)',
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 32,
+              padding: 'clamp(24px, 5vw, 48px)',
+              boxShadow: '0 4px 24px -1px rgba(0, 0, 0, 0.2)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 20,
+              textAlign: 'left',
+            }}>
+              {content.askBullets?.map((bullet, i) => (
+                <div key={i} style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'rgba(255,255,255,0.6)', marginTop: 9, flexShrink: 0 }} />
+                  <p style={{
+                    fontSize: 'min(18px, 4.5vw)',
+                    lineHeight: 1.6,
+                    color: 'rgba(255,255,255,0.92)',
+                    margin: 0,
+                    fontFamily: "'Plus Jakarta Sans', sans-serif",
+                    fontWeight: 400,
+                  }}>
+                    <strong style={{ color: '#fff', fontWeight: 600 }}>{bullet.title}</strong>
+                    {' — '}
+                    {bullet.body}
+                  </p>
+                </div>
+              ))}
+            </FadeIn>
+          </div>
         )}
 
         {/* Email CTA */}

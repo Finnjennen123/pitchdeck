@@ -12,6 +12,7 @@ export function useSlideNavigation(totalSlides: number) {
   const [transitionState, setTransitionState] = useState<TransitionState>('idle');
   const [transitionData, setTransitionData] = useState<TransitionData | null>(null);
   const slideRef = useRef(0);
+  const transitionStateRef = useRef<TransitionState>('idle');
   const lastScrollTime = useRef(0);
   const overscrollAccumulator = useRef(0);
   const touchStart = useRef<{ y: number; time: number; scrollable: HTMLElement | null }>({ y: 0, time: 0, scrollable: null });
@@ -26,29 +27,33 @@ export function useSlideNavigation(totalSlides: number) {
   }, []);
 
   const goToSlide = useCallback((index: number) => {
-    if (transitionState !== 'idle') return; // Block input during transition
+    if (transitionStateRef.current !== 'idle') return; // Block input during transition
     const clamped = Math.max(0, Math.min(totalSlides - 1, index));
     if (clamped !== slideRef.current) {
       // Check if this is the internal Strategy slide transition (6 <-> 7)
       const isStrategySwap = (slideRef.current === 6 && clamped === 7) || (slideRef.current === 7 && clamped === 6);
-      
+
       // 1. Start exiting content
       setTransitionData({ from: slideRef.current, to: clamped });
+      transitionStateRef.current = 'exiting';
       setTransitionState('exiting');
-      
+
       // 2. Wait for content to disappear (600ms), then move camera
       setTimeout(() => {
         updateSlide(clamped);
+        transitionStateRef.current = 'moving';
         setTransitionState('moving');
-        
-        // 3. Wait for camera to settle (1400ms normally, 50ms for strategy swap), then show new content
+
+        // 3. Wait for camera to settle (1400ms normally, 400ms for strategy swap), then show new content
         setTimeout(() => {
+          transitionStateRef.current = 'idle';
           setTransitionState('idle');
           setTransitionData(null);
-        }, isStrategySwap ? 50 : 1400);
+          overscrollAccumulator.current = 0; // flush any momentum that built up during transition
+        }, isStrategySwap ? 400 : 1400);
       }, 600);
     }
-  }, [totalSlides, updateSlide, transitionState]);
+  }, [totalSlides, updateSlide]); // transitionState removed — read from ref instead
 
   const next = useCallback(() => {
     goToSlide(slideRef.current + 1);

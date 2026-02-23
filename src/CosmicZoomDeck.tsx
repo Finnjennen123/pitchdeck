@@ -21,11 +21,11 @@ useLoader.preload(TextureLoader, [
   'textures/earth_clouds_2k.jpg',
 ]);
 
-const TOTAL_SLIDES = 11;
+const TOTAL_SLIDES = 12;
 
 // Map slide -> segment index
 // 0: City+Aerial, 2: Earth, 3: Solar, 4: Galaxy, 5: Universe
-const SLIDE_TO_SEGMENT = [0, 0, 2, 2, 2, 2, 3, 3, 4, 4, 5];
+const SLIDE_TO_SEGMENT = [0, 0, 2, 2, 2, 2, 3, 3, 4, 4, 5, 5];
 
 const EARTH_RADIUS = 10;
 
@@ -65,8 +65,10 @@ function getCameraState(slide: number): CamState {
       return [8, 35, 60, 0, 0, 0, 58];
     case 9: // Slide 9: Business - Clusters
       return [40, 60, 160, 0, 0, 0, 60];
-    case 10: // Slide 10: Thank You - Universe
+    case 10: // Slide 11: Ask - Universe
       return [80, 120, 380, 0, 0, 0, 62];
+    case 11: // Slide 12: Thank You - Deep Universe
+      return [160, 240, 760, 0, 0, 0, 65];
     default:
       return [0, 0, 10, 0, 0, 0, 60];
   }
