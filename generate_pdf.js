@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const TOTAL_SLIDES = 11;
+const TOTAL_SLIDES = 12;
 const TARGET_URL = 'http://localhost:5174/pitch/';
 const OUTPUT_PATH = path.join(__dirname, 'public', 'Menius_Pitch_Deck.pdf');
 
@@ -36,8 +36,9 @@ async function generatePDF() {
     console.log(`🌐 Navigating to ${TARGET_URL}...`);
     await page.goto(TARGET_URL, { waitUntil: 'networkidle0', timeout: 60000 });
 
-    // Wait for initial load
-    await delay(3000);
+    // Wait for initial load and intro animation
+    console.log('⏳ Waiting for intro animation to complete...');
+    await delay(10000);
 
     for (let i = 0; i < TOTAL_SLIDES; i++) {
       console.log(`📸 Capturing Slide ${i + 1}/${TOTAL_SLIDES}...`);

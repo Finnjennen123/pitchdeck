@@ -167,6 +167,7 @@ const SLIDE_CONTENT: SlideContent[] = [
     type: 'video',
     position: 'center',
     videoEmbed: 'https://www.youtube.com/embed/s6-YgvXSVZM',
+    videoUrl: 'https://youtu.be/s6-YgvXSVZM',
   },
   // Slide 6: Strategy - The Funnel
   {
@@ -364,6 +365,7 @@ export function TextOverlay({ currentSlide, transitionState, transitionData, jus
         paddingTop: 'max(40px, env(safe-area-inset-top) + 20px)',
         paddingBottom: 'max(40px, env(safe-area-inset-bottom) + 20px)',
         pointerEvents: 'auto',
+        userSelect: 'text', // Allow text selection
         zIndex: 10,
         textAlign: isCenter ? 'center' : isLeft ? 'left' : 'right',
         color: '#fff',
@@ -757,23 +759,53 @@ export function TextOverlay({ currentSlide, transitionState, transitionData, jus
             marginTop: 20,
             width: '100%',
             maxWidth: 900,
-            aspectRatio: '16/9',
-            background: 'rgba(0,0,0,0.3)',
-            borderRadius: 24,
-            overflow: 'hidden',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
-            border: '1px solid rgba(255,255,255,0.1)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 16
           }}>
-            <iframe
-              width="100%"
-              height="100%"
-              src={content.videoEmbed}
-              title="YouTube video player"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-              style={{ display: 'block' }}
-            />
+            <div style={{
+              width: '100%',
+              aspectRatio: '16/9',
+              background: 'rgba(0,0,0,0.3)',
+              borderRadius: 24,
+              overflow: 'hidden',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+              border: '1px solid rgba(255,255,255,0.1)',
+            }}>
+              <iframe
+                width="100%"
+                height="100%"
+                src={content.videoEmbed}
+                title="YouTube video player"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                style={{ display: 'block' }}
+              />
+            </div>
+            
+            {/* Copy-pasteable link for PDF/sharing */}
+            {content.videoUrl && (
+              <a 
+                href={content.videoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  fontFamily: "'Plus Jakarta Sans', sans-serif",
+                  fontSize: 16,
+                  color: 'rgba(255,255,255,0.7)',
+                  textDecoration: 'none',
+                  borderBottom: '1px solid rgba(255,255,255,0.3)',
+                  paddingBottom: 2,
+                  transition: 'color 0.2s ease',
+                  userSelect: 'text',
+                  cursor: 'pointer'
+                }}
+              >
+                {content.videoUrl}
+              </a>
+            )}
           </FadeIn>
         )}
 
