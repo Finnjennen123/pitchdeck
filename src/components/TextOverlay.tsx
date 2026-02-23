@@ -232,7 +232,7 @@ const SLIDE_CONTENT: SlideContent[] = [
     headerTitle: 'The Ask',
     type: 'ask',
     position: 'center',
-    askAmount: "We're raising $400K",
+    askAmount: "We're raising $500K",
     askBullets: [
       { title: 'Distribution at scale', body: 'Double down on the acquisition channels already converting, turning a working funnel into a repeatable growth engine.' },
       { title: 'Accelerate product development', body: 'We have a backlog of features real paying users are asking for. This gets us to them faster.' },
