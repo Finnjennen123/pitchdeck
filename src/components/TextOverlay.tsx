@@ -212,8 +212,8 @@ const SLIDE_CONTENT: SlideContent[] = [
     stats: [
       { value: '80', label: 'active users' },
       { value: '550', label: 'waitlisted' },
-      { value: '5', label: 'paying customers' },
-      { value: '$255', label: 'revenue' },
+      { value: '10', label: 'paying customers' },
+      { value: '$500', label: 'revenue' },
       { value: '$100K', label: 'VC offer' }
     ]
   },

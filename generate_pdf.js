@@ -1,4 +1,3 @@
-
 import puppeteer from 'puppeteer';
 import { PDFDocument } from 'pdf-lib';
 import fs from 'fs';
@@ -16,13 +15,13 @@ const OUTPUT_PATH = path.join(__dirname, 'public', 'Menius_Pitch_Deck.pdf');
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function generatePDF() {
-  console.log('🚀 Starting PDF Generation...');
+  console.log('🚀 Starting PDF Generation (Selectable Text Version)...');
   const browser = await puppeteer.launch({
     headless: "new",
     defaultViewport: {
       width: 1920,
       height: 1080,
-      deviceScaleFactor: 2, // High DPI capture
+      deviceScaleFactor: 2, // High DPI
     },
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
@@ -35,13 +34,16 @@ async function generatePDF() {
   try {
     console.log(`🌐 Navigating to ${TARGET_URL}...`);
     await page.goto(TARGET_URL, { waitUntil: 'networkidle0', timeout: 60000 });
+    
+    // Ensure we capture screen styles, not print styles
+    await page.emulateMediaType('screen');
 
     // Wait for initial load and intro animation
     console.log('⏳ Waiting for intro animation to complete...');
     await delay(10000);
 
     for (let i = 0; i < TOTAL_SLIDES; i++) {
-      console.log(`📸 Capturing Slide ${i + 1}/${TOTAL_SLIDES}...`);
+      console.log(`� Capturing Slide ${i + 1}/${TOTAL_SLIDES} as PDF...`);
 
       // Use the exposed window function to navigate
       await page.evaluate((index) => {
@@ -67,37 +69,39 @@ async function generatePDF() {
           .nav-dots, .nav-counter, button, a[download] {
             display: none !important;
           }
+          /* Ensure background colors are printed if they are set on body/html */
+          body {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
         `
       });
 
-      // Capture screenshot as buffer
-      const screenshotBuffer = await page.screenshot({
-        type: 'jpeg',
-        quality: 90,
-        fullPage: false // Viewport only
+      // Capture PDF of the current slide
+      // Note: We use width/height to match the viewport
+      const pdfBuffer = await page.pdf({
+        width: '1920px',
+        height: '1080px',
+        printBackground: true,
+        pageRanges: '1'
       });
 
-      pdfBuffers.push(screenshotBuffer);
+      pdfBuffers.push(pdfBuffer);
     }
 
-    console.log('✨ All slides captured. Merging into PDF...');
+    console.log('✨ All slides captured. Merging into final PDF...');
 
-    // Create a new PDF document
-    const pdfDoc = await PDFDocument.create();
+    // Create a new PDF document to merge into
+    const mergedPdf = await PDFDocument.create();
 
     for (const buffer of pdfBuffers) {
-      const image = await pdfDoc.embedJpg(buffer);
-      const page = pdfDoc.addPage([1920, 1080]);
-      page.drawImage(image, {
-        x: 0,
-        y: 0,
-        width: 1920,
-        height: 1080,
-      });
+      const srcDoc = await PDFDocument.load(buffer);
+      const [copiedPage] = await mergedPdf.copyPages(srcDoc, [0]);
+      mergedPdf.addPage(copiedPage);
     }
 
     // Serialize the PDFDocument to bytes
-    const pdfBytes = await pdfDoc.save();
+    const pdfBytes = await mergedPdf.save();
 
     // Write the PDF to file
     fs.writeFileSync(OUTPUT_PATH, pdfBytes);
